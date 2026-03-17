@@ -1,0 +1,52 @@
+import os
+
+# Base path
+BASE_DIR = "self_healing_agent/src/app"
+
+# Folder structure
+folders = [
+    BASE_DIR,
+    f"{BASE_DIR}/nodes",
+    f"{BASE_DIR}/tools",
+    f"{BASE_DIR}/memory",
+    f"{BASE_DIR}/parsers",
+    f"{BASE_DIR}/config",
+]
+
+# Files to create with minimal boilerplate
+files = {
+    "self_healing_agent/pyproject.toml": "",
+    "self_healing_agent/.env": "",
+
+    f"{BASE_DIR}/main.py": "# Entry point\n",
+    f"{BASE_DIR}/graph.py": "# LangGraph workflow\n",
+    f"{BASE_DIR}/state.py": "# Shared state\n",
+
+    f"{BASE_DIR}/nodes/run_test.py": "",
+    f"{BASE_DIR}/nodes/fallback_rules.py": "",
+    f"{BASE_DIR}/nodes/cache_lookup.py": "",
+    f"{BASE_DIR}/nodes/llm_reason.py": "",
+    f"{BASE_DIR}/nodes/retry_action.py": "",
+    f"{BASE_DIR}/nodes/finalize.py": "",
+
+    f"{BASE_DIR}/tools/playwright_tool.py": "",
+    f"{BASE_DIR}/memory/cache.py": "",
+    f"{BASE_DIR}/parsers/dom_parser.py": "",
+    f"{BASE_DIR}/config/settings.py": "",
+}
+
+def create_structure():
+    # Create folders
+    for folder in folders:
+        os.makedirs(folder, exist_ok=True)
+
+    # Create files
+    for file_path, content in files.items():
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+    print("✅ Project structure created successfully!")
+
+if __name__ == "__main__":
+    create_structure()
