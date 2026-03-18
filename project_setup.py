@@ -21,17 +21,23 @@ files = {
     f"{BASE_DIR}/main.py": "# Entry point\n",
     f"{BASE_DIR}/graph.py": "# LangGraph workflow\n",
     f"{BASE_DIR}/state.py": "# Shared state\n",
+    f"{BASE_DIR}/__init__.py": "",
 
     f"{BASE_DIR}/nodes/run_test.py": "",
+    f"{BASE_DIR}/nodes/__init__.py": "",
     f"{BASE_DIR}/nodes/fallback_rules.py": "",
     f"{BASE_DIR}/nodes/cache_lookup.py": "",
     f"{BASE_DIR}/nodes/llm_reason.py": "",
     f"{BASE_DIR}/nodes/retry_action.py": "",
     f"{BASE_DIR}/nodes/finalize.py": "",
 
+    f"{BASE_DIR}/tools/__init__.py": "",
     f"{BASE_DIR}/tools/playwright_tool.py": "",
+    f"{BASE_DIR}/memory/__init__.py": "",
     f"{BASE_DIR}/memory/cache.py": "",
+    f"{BASE_DIR}/parsers/__init__.py": "",
     f"{BASE_DIR}/parsers/dom_parser.py": "",
+    f"{BASE_DIR}/config/__init__.py": "",
     f"{BASE_DIR}/config/settings.py": "",
 }
 
