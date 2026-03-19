@@ -1,11 +1,10 @@
 from playwright.sync_api import Page
-from pages.checkout_page import CheckoutOverviewPage
-from pages.cart_page import CartPage
-from pages.fill_login import LoginPage
-from pages.inventory_page import InventoryItemPage
-from pages.user_credential import UserCredential
-from log_setup.logger_setup import get_logger
-
+from src.automation.pages.checkout_page import CheckoutOverviewPage
+from src.automation.pages.cart_page import CartPage
+from src.automation.pages.fill_login import LoginPage
+from src.automation.pages.inventory_page import InventoryItemPage
+from src.automation.pages.user_credential import UserCredential
+from src.automation.log_setup.logger_setup import get_logger
 logger = get_logger()
 
 
