@@ -1,7 +1,11 @@
-# Shared state
-from typing import Annotated, TypedDict
-from langchain_core.messages import BaseMessage
+from typing import TypedDict, Optional
+
 class AgentState(TypedDict):
-    messages: Annotated[list[BaseMessage], "add_messages"]
-    error_message: str
-    dom_string: str
+    test_name:    str
+    selector:     str
+    error:        str
+    dom_context:  str
+    suggestion:   Optional[str]
+    confidence:   float
+    reason:       Optional[str]
+    step_passed:  bool

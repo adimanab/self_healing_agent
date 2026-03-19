@@ -26,7 +26,7 @@ def error_store() -> list[ErrorReport]:
 @pytest.fixture(scope="session")
 def page():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         page = browser.new_page()
         page.goto("https://www.saucedemo.com/")
         yield page
