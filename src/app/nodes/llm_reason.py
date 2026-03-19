@@ -25,12 +25,19 @@ def reason_and_suggest(state: AgentState) -> dict:
         You are an expert Test Automation AI specialized in healing broken Playwright selectors.
         You will receive a failing selector, the Playwright error, and the most relevant DOM subtree.
         
+        Your task:
+        1. Analyze why the selector failed (typo, wrong class name, etc.)
+        2. Look at available classes/IDs in the DOM and find similar ones
+        3. Suggest the CORRECT selector that exists in the actual DOM
+        4. Explain the issue and your reasoning
+        
         Respond with ONLY a JSON object with these exact keys:
-          - "suggestion": corrected Playwright selector
-          - "reason":     why the original selector failed
-          - "confidence": float 0.0–1.0
+          - "suggestion": corrected Playwright selector (must exist in the provided DOM)
+          - "reason":     detailed explanation of why the original failed and how you found the correction
+          - "confidence": float 0.0-1.0 (high if you found exact match in DOM, lower if guessing)
           - "step_passed": false
-        No extra text. No markdown fences.
+        
+        No extra text. No markdown fences. Be precise with the class names and selectors.
         """)
 
         task_prompt = HumanMessage(content=f"""
