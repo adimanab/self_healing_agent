@@ -1,15 +1,21 @@
 from langgraph.graph import StateGraph, START, END
-from src.app.nodes.llm_reason import reason_and_suggest
 from src.app.state import AgentState
+
+
+# from src.app.nodes.extract_dom import extract_dom
+# from src.app.nodes.llm_node    import llm_node
+# from src.app.nodes.reporter    import reporter
 
 builder = StateGraph(AgentState)
 
-# Add single node
-builder.add_node("agent", reason_and_suggest)
+# builder.add_node("extract_dom", extract_dom)
+# builder.add_node("llm_node",    llm_node)
+# builder.add_node("reporter",    reporter)
 
-# Linear flow
-builder.add_edge(START, "agent")
-builder.add_edge("agent", END)
+# builder.add_edge(START,         "extract_dom")
+# builder.add_edge("extract_dom", "llm_node")
+# builder.add_edge("llm_node",    "reporter")
+# builder.add_edge("reporter",    END)
 
 self_healing_graph = builder.compile()
 
