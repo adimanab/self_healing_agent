@@ -14,3 +14,4 @@ langchain-openai==1.1.11
 langgraph==1.1.2
 langsmith==0.7.20
 python-dotenv==1.2.2
+textual==8.1.1

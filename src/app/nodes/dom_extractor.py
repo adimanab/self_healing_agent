@@ -168,7 +168,7 @@ def _by_label(soup, label_text: str):
 
 def _resolve_from_error(soup, error: str):
     # Match single quotes, double quotes, and backticks
-    clues = re.findall(r"['\"`](.*?)['\"`]", error)
+    clues = re.findall(r"['\"](.*?)['\"]", error)
     # Filter out noise words that Playwright injects
     noise = {'strict mode', 'timeout', 'expected', 'visible', 'hidden', 'enabled', 'disabled'}
     for clue in clues:
