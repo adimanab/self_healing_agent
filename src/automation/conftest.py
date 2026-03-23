@@ -31,7 +31,7 @@ _selector_tracker = {}  # Track which selectors returned empty/None
 def error_store() -> list[ErrorReport]:
     return _error_reports
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def page():
     global _current_page
     with sync_playwright() as p:
