@@ -12,7 +12,7 @@ def open_in_editor(file_path: str, line: int, column: int = 1):
 
     editors = [
         # VS Code (supports line:column)
-        ("code", ["code", "-g", f"{file_path}:{line}:{column}"]),
+        ("code", ["code", "--reuse-window", "--goto", f"{file_path}:{line}:{column}"]),
 
         # PyCharm (line works, column support limited)
         ("pycharm", ["pycharm", f"{file_path}:{line}"]),
@@ -25,12 +25,12 @@ def open_in_editor(file_path: str, line: int, column: int = 1):
     ]
 
     for name, command in editors:
-        if shutil.which(name):
-            try:
-                subprocess.run(command)
-                return
-            except Exception as e:
-                print(f"Failed with {name}: {e}")
+            if shutil.which(name):
+                try:
+                    subprocess.run(command)
+                    return
+                except Exception as e:
+                    print(f"Failed with {name}: {e}")
 
     print("No supported editor CLI found.")
     print(f"Open manually: {file_path}:{line}:{column}")
