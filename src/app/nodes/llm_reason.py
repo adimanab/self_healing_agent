@@ -1,11 +1,11 @@
+import os
 import json
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
-from src.app.state import AgentState
-import os
-
 load_dotenv(override=True)
+from src.app.state import AgentState
+from langchain_openai import ChatOpenAI
+
 
 llm = ChatOpenAI(
     model="llama-3.3-70b-versatile",
