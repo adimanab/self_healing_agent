@@ -9,7 +9,7 @@ from src.app.state import AgentState
 
 def route_after_dom(state: AgentState):
     """Conditional routing: dynamic sites get xpath building, static go direct"""
-    return "xpath" if state.get("is_dynamic") else "agent" 
+    return "xpath" if state.get("is_dynamic") else "Reasoning_agent" 
 
 builder = StateGraph(AgentState)
 

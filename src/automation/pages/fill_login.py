@@ -5,7 +5,7 @@ class LoginPage:
         self.page = page
         self.username = "#user-name"
         self.password = "#password"
-        self.login_b = "#login"
+        self.login_b = "#login-button"
 
     def fill_form(self,username:str,password:str):
         self.page.fill(self.username, username)
