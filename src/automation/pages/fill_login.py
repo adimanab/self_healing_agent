@@ -3,10 +3,9 @@ from playwright.sync_api import Page
 class LoginPage:
     def __init__(self, page: Page):
         self.page = page
-        # self.username = "#user-name"
         self.username = "#user-name"
         self.password = "#password"
-        self.login_b = "#login-button"
+        self.login_b = "#login"
 
     def fill_form(self,username:str,password:str):
         self.page.fill(self.username, username)

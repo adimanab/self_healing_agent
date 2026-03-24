@@ -12,6 +12,11 @@ class AgentState(TypedDict):
     reason:      Optional[str]
     step_passed: bool
     messages:    Annotated[list[BaseMessage], operator.add]
+      
+    #tools
+    approved:    bool
+    file_path:   Optional[str]
+    line_number: Optional[int]
 
     #xpath 
     is_dynamic:       bool                 # detected by dom_extractor

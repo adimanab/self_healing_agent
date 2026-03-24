@@ -7,7 +7,7 @@ class CheckoutOverviewPage:
         self.page = page
         self.item_names = ".inventory_item_name"
         self.item_desc = ".inventory_item_desc"
-        self.item_prices = ".inventory_price"
+        self.item_prices = ".inventory_item_price"
 
     def get_names(self):
         return self.page.locator(self.item_names).all_text_contents()

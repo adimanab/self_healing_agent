@@ -1,20 +1,21 @@
+import os
+import sys
 import datetime
 import subprocess
-import sys
+from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
-from rich.align import Align
 from rich import box
+from src.app.state import AgentState
 
-def print_healing_report(state: dict) -> None:
+def human_approval(state: AgentState) -> dict:
     console = Console()
     
     suggestion  = state.get("suggestion", "—")
     selector    = state.get("selector",   "—")
     confidence  = float(state.get("confidence", 0.0))
-    step_passed = bool(state.get("step_passed", False))
     reason      = state.get("reason", "—")
     timestamp   = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     test_short  = state.get("test_name", "—").split("::")[-1]
@@ -25,16 +26,17 @@ def print_healing_report(state: dict) -> None:
         error_lines[0]
     )
 
-    status       = "HEALED" if step_passed else "FAILED"
-    status_style = "bold green" if step_passed else "bold red"
+    file_path = state.get("file_path")
+    line_number = state.get("line_number")
+    base_dir = Path(__file__).parent.parent.parent.parent
 
     # Header
     header = Table.grid(expand=True)
     header.add_column()
     header.add_column(justify="right")
     header.add_row(
-        Text("SELF-HEALING AGENT  —  SELECTOR REPAIR", style="bold blue"),
-        Text.assemble((status, status_style), f"  {timestamp}", style="dim")
+        Text("SELF-HEALING AGENT  —  HUMAN APPROVAL", style="bold blue"),
+        Text(f"  {timestamp}", style="dim")
     )
     console.print(Panel(header, style="blue", box=box.SQUARE))
 
@@ -49,6 +51,12 @@ def print_healing_report(state: dict) -> None:
     left_table.add_row("SELECTOR", Text(f" {selector} ", style="bold white on red"))
     left_table.add_row("ERROR", Text(error_short, style="yellow"))
     left_table.add_row("TEST", Text(test_short, style="dim"))
+    if file_path:
+        try:
+            rel_path = os.path.relpath(file_path, base_dir)
+            left_table.add_row("FILE", Text(f"{rel_path}:{line_number}", style="dim"))
+        except ValueError:
+            left_table.add_row("FILE", Text(f"{file_path}:{line_number}", style="dim"))
     
     left_panel = Panel(left_table, title="[dim]broken selector[/dim]", title_align="left", expand=True, border_style="dim")
 
@@ -73,61 +81,61 @@ def print_healing_report(state: dict) -> None:
     layout_table.add_row(left_panel, right_panel)
     console.print(layout_table)
     
-    # footer
+    # footer interaction
     footer = Table.grid(expand=True)
     footer.add_column()
     footer.add_column(justify="right")
     footer.add_row(
         Text("self-healing-agent  ·  langgraph + groq", style="dim"),
-        Text("[C] copy fix   [Enter] continue", style="dim")
+        Text("[A]ccept Fix   [R]eject Fix   [C]opy Fix", style="bold")
     )
     console.print(Panel(footer, border_style="dim", box=box.SQUARE))
 
-    # Read input directly from the console to avoid pytest capture issues
-    console.print("[dim]Press 'C' to copy fix, or Enter to continue... [/dim]", end="")
+    approved = False
+
+    # Read input
+    console.print("[dim]Action [(A)ccept / (R)eject / (C)opy]: [/dim]", end="")
     try:
         if sys.platform == "win32":
             import msvcrt
-            # Flush existing keys
             while msvcrt.kbhit():
                 msvcrt.getch()
-            # Wait for key
             key = msvcrt.getch()
-            # If carriage return/enter, continue
-            if key in (b'\r', b'\n'):
-                console.print()
-            else:
-                try:
-                    char = key.decode("utf-8").lower()
-                except Exception:
-                    char = ""
-                console.print(char)
-                if char == 'c':
-                    _copy_to_clip(suggestion, console)
+            try:
+                char = key.decode("utf-8").lower()
+            except Exception:
+                char = ""
         else:
-            # try to use simple input, might be captured by pytest, 
-            # so we'll fallback to reading /dev/tty
             try:
                 import tty, termios
                 fd = sys.stdin.fileno()
                 old_settings = termios.tcgetattr(fd)
                 try:
-                    tty.setraw(sys.stdin.fileno())
-                    ch = sys.stdin.read(1)
+                    tty.setraw(fd)
+                    char = sys.stdin.read(1).lower()
                 finally:
                     termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-                
-                if ch.lower() == 'c':
-                    console.print("\n")
-                    _copy_to_clip(suggestion, console)
-                else:
-                    console.print("\n")
             except Exception:
-                user_input = input("").strip().lower()
-                if user_input == 'c':
-                    _copy_to_clip(suggestion, console)
+                char = input("").strip().lower()
+                
+        console.print(char.upper())
+
+        if char == 'a':
+            approved = True
+            console.print("[bold green]✓ Fix accepted. Applying...[/bold green]")
+        elif char == 'r':
+            console.print("[bold red]✗ Fix rejected.[/bold red]")
+        elif char == 'c':
+            _copy_to_clip(suggestion, console)
+            console.print("[dim]Continuing without applying fix (copied to clipboard)[/dim]")
     except Exception as e:
         console.print(f"\n[dim]Continuing...[/dim]")
+
+    return {
+        "approved": approved,
+        "file_path": file_path,
+        "line_number": line_number
+    }
 
 def _copy_to_clip(text: str, console: Console):
     import subprocess, sys
