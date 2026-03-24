@@ -28,15 +28,5 @@ def run_healing_agent(test_name: str, selector: str, error: str, page) -> None:
     graph  = graph_init()
     result = graph.invoke(state)
 
-    # Step 2 — Textual gets its own isolated thread + event loop
-    def _launch_ui():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            print_healing_report(result)
-        finally:
-            loop.close()
-
-    t = threading.Thread(target=_launch_ui, daemon=False)
-    t.start()
-    t.join()
+    # Step 2 — Use rich directly to print report
+    print_healing_report(result)
