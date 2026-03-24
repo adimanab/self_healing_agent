@@ -1,112 +1,24 @@
-2026-03-23 11:23:51,486 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 11:24:05,164 - INFO - Item removed from cart successfully
-2026-03-23 11:24:08,166 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 11:24:21,913 - INFO - Clicked checkout button
-2026-03-23 11:26:11,432 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 11:26:25,308 - INFO - Item removed from cart successfully
-2026-03-23 11:26:27,612 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 11:26:41,334 - INFO - Clicked checkout button
-2026-03-23 11:39:23,041 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 11:39:36,675 - INFO - Item removed from cart successfully
-2026-03-23 11:39:38,752 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 11:39:52,451 - INFO - Clicked checkout button
-2026-03-23 13:06:11,606 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 13:06:25,489 - INFO - Item removed from cart successfully
-2026-03-23 13:06:27,525 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 13:06:41,441 - INFO - Clicked checkout button
-2026-03-23 13:15:18,608 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 13:15:32,490 - INFO - Item removed from cart successfully
-2026-03-23 13:15:35,041 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 13:15:48,911 - INFO - Clicked checkout button
-2026-03-23 13:19:42,216 - INFO - Starting test: test_login
-2026-03-23 13:19:47,438 - INFO - Login successful
-2026-03-23 13:20:12,112 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 13:20:26,010 - INFO - Clicked checkout button
-2026-03-23 13:22:40,985 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 13:22:54,894 - INFO - Item removed from cart successfully
-2026-03-23 13:22:58,025 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 13:23:11,887 - INFO - Clicked checkout button
-2026-03-23 13:31:48,770 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 13:32:02,749 - INFO - Item removed from cart successfully
-2026-03-23 13:32:05,560 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 13:32:19,621 - INFO - Clicked checkout button
-2026-03-23 15:11:38,864 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 15:11:52,796 - INFO - Item removed from cart successfully
-2026-03-23 15:11:54,992 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 15:12:08,999 - INFO - Clicked checkout button
-2026-03-23 15:12:42,205 - INFO - Starting test: test_add_items_under_20
-2026-03-23 15:12:55,949 - INFO - Added items: ['Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt', 'Sauce Labs Onesie', 'Test.allTheThings() T-Shirt (Red)']
-2026-03-23 15:12:56,082 - INFO - Inventory items under $20 validated in cart
-2026-03-23 15:12:58,178 - INFO - Starting test: test_login
-2026-03-23 15:13:03,374 - INFO - Login successful
-2026-03-23 15:14:57,098 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 15:15:30,839 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 15:16:04,185 - INFO - Starting test: test_add_items_under_20
-2026-03-23 15:16:37,236 - INFO - Starting test: test_login
-2026-03-23 16:18:32,279 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 16:18:52,228 - INFO - Item removed from cart successfully
-2026-03-23 16:18:55,948 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 16:19:17,823 - INFO - Clicked checkout button
-2026-03-23 16:19:20,287 - INFO - User information submitted
-2026-03-23 16:19:20,341 - INFO - Checkout overview items validated
-2026-03-23 16:19:20,373 - INFO - Subtotal and tax matched
-2026-03-23 16:19:20,391 - INFO - Total price matched
-2026-03-23 16:19:20,484 - INFO - Order finished successfully
-2026-03-23 16:19:24,450 - INFO - Starting test: test_add_items_under_20
-2026-03-23 16:19:38,195 - INFO - Added items: ['Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt', 'Sauce Labs Onesie', 'Test.allTheThings() T-Shirt (Red)']
-2026-03-23 16:19:38,328 - INFO - Inventory items under $20 validated in cart
-2026-03-23 16:20:03,803 - INFO - Starting test: test_login
-2026-03-23 16:20:11,107 - INFO - Login successful
-2026-03-23 16:21:43,491 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 16:22:31,698 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 16:23:25,375 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 16:23:40,010 - INFO - Item removed from cart successfully
-2026-03-23 16:23:43,015 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 16:23:59,117 - INFO - Clicked checkout button
-2026-03-23 16:24:02,183 - INFO - User information submitted
-2026-03-23 16:24:17,395 - INFO - Starting test: test_add_items_under_20
-2026-03-23 16:24:31,249 - INFO - Added items: ['Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt', 'Sauce Labs Onesie', 'Test.allTheThings() T-Shirt (Red)']
-2026-03-23 16:24:31,413 - INFO - Inventory items under $20 validated in cart
-2026-03-23 16:24:35,033 - INFO - Starting test: test_login
-2026-03-23 16:24:40,400 - INFO - Login successful
-2026-03-23 16:30:29,261 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 16:30:43,263 - INFO - Item removed from cart successfully
-2026-03-23 16:30:46,997 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 16:31:00,982 - INFO - Clicked checkout button
-2026-03-23 16:31:02,192 - INFO - User information submitted
-2026-03-23 16:31:37,522 - INFO - Starting test: test_add_items_under_20
-2026-03-23 16:31:51,248 - INFO - Added items: ['Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt', 'Sauce Labs Onesie', 'Test.allTheThings() T-Shirt (Red)']
-2026-03-23 16:31:51,377 - INFO - Inventory items under $20 validated in cart
-2026-03-23 16:31:54,489 - INFO - Starting test: test_login
-2026-03-23 16:31:59,746 - INFO - Login successful
-2026-03-23 16:39:59,396 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 16:40:58,978 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 17:48:07,993 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 17:48:28,812 - INFO - Item removed from cart successfully
-2026-03-23 17:48:32,404 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 17:49:08,770 - INFO - Clicked checkout button
-2026-03-23 17:49:21,236 - INFO - User information submitted
-2026-03-23 17:49:21,300 - INFO - Checkout overview items validated
-2026-03-23 17:49:21,336 - INFO - Subtotal and tax matched
-2026-03-23 17:49:21,355 - INFO - Total price matched
-2026-03-23 17:49:23,465 - INFO - Order finished successfully
-2026-03-23 17:49:27,132 - INFO - Starting test: test_add_items_under_20
-2026-03-23 17:49:48,865 - INFO - Added items: ['Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt', 'Sauce Labs Onesie', 'Test.allTheThings() T-Shirt (Red)']
-2026-03-23 17:49:50,948 - INFO - Inventory items under $20 validated in cart
-2026-03-23 17:49:54,533 - INFO - Starting test: test_login
-2026-03-23 17:49:59,876 - INFO - Login successful
-2026-03-23 17:50:26,304 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 17:50:40,240 - INFO - Item removed from cart successfully
-2026-03-23 17:50:43,363 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 17:51:01,419 - INFO - Clicked checkout button
-2026-03-23 17:51:04,473 - INFO - User information submitted
-2026-03-23 17:58:08,004 - INFO - Starting test: test_remove_item_from_cart
-2026-03-23 17:58:22,272 - INFO - Item removed from cart successfully
-2026-03-23 17:58:26,302 - INFO - Starting test: test_checkout_price_and_finish
-2026-03-23 17:58:51,138 - INFO - Clicked checkout button
-2026-03-23 17:58:54,171 - INFO - User information submitted
-2026-03-23 17:59:54,599 - INFO - Starting test: test_add_items_under_20
-2026-03-23 18:00:08,399 - INFO - Added items: ['Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt', 'Sauce Labs Onesie', 'Test.allTheThings() T-Shirt (Red)']
-2026-03-23 18:00:08,548 - INFO - Inventory items under $20 validated in cart
-2026-03-23 18:00:12,563 - INFO - Starting test: test_login
-2026-03-23 18:00:17,903 - INFO - Login successful
+2026-03-23 21:09:10,579 - INFO - Starting test: test_remove_item_from_cart
+2026-03-23 21:09:23,849 - INFO - Item removed from cart successfully
+2026-03-23 21:09:25,033 - INFO - Starting test: test_checkout_price_and_finish
+2026-03-23 21:09:38,441 - INFO - Clicked checkout button
+2026-03-23 21:09:39,489 - INFO - User information submitted
+2026-03-23 21:09:41,893 - INFO - Starting test: test_add_items_under_20
+2026-03-23 21:09:55,079 - INFO - Added items: ['Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt', 'Sauce Labs Onesie', 'Test.allTheThings() T-Shirt (Red)']
+2026-03-23 21:09:55,110 - INFO - Inventory items under $20 validated in cart
+2026-03-23 21:09:56,415 - INFO - Starting test: test_login
+2026-03-23 21:10:01,544 - INFO - Login successful
+2026-03-23 22:44:48,980 - INFO - Starting test: test_remove_item_from_cart
+2026-03-23 22:45:02,279 - INFO - Item removed from cart successfully
+2026-03-23 22:45:03,468 - INFO - Starting test: test_checkout_price_and_finish
+2026-03-23 22:45:16,928 - INFO - Clicked checkout button
+2026-03-23 22:45:17,975 - INFO - User information submitted
+2026-03-23 22:45:20,266 - INFO - Starting test: test_add_items_under_20
+2026-03-23 22:45:33,559 - INFO - Added items: ['Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt', 'Sauce Labs Onesie', 'Test.allTheThings() T-Shirt (Red)']
+2026-03-23 22:45:33,586 - INFO - Inventory items under $20 validated in cart
+2026-03-23 22:45:34,794 - INFO - Starting test: test_login
+2026-03-23 22:45:39,952 - INFO - Login successful
+2026-03-23 23:08:38,139 - INFO - Starting test: test_remove_item_from_cart
+2026-03-23 23:09:10,597 - INFO - Starting test: test_checkout_price_and_finish
+2026-03-23 23:09:44,875 - INFO - Starting test: test_add_items_under_20
+2026-03-23 23:10:17,106 - INFO - Starting test: test_login
