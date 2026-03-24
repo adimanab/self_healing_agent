@@ -62,11 +62,15 @@ def file_locator_tool(test_name: str, failing_selector: str) -> dict:
 
     if len(matches) == 1:
         match = matches[0]
-        open_in_editor(
-            match["file_path"],
-            match["line_number"],
-            match["column_number"]
-        )
+        try:
+            open_in_editor(
+                match["file_path"],
+                match["line_number"],
+                match["column_number"]
+            )
+        except Exception:
+            pass
+        return match
 
     elif len(matches) > 1:
         selected_match = None
@@ -81,11 +85,14 @@ def file_locator_tool(test_name: str, failing_selector: str) -> dict:
         if not selected_match:
             selected_match = matches[0]
 
-        open_in_editor(
-            selected_match["file_path"],
-            selected_match["line_number"],
-            selected_match["column_number"]
-        )
+        try:
+            open_in_editor(
+                selected_match["file_path"],
+                selected_match["line_number"],
+                selected_match["column_number"]
+            )
+        except Exception:
+            pass
 
         return selected_match
 

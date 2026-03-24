@@ -12,3 +12,6 @@ class AgentState(TypedDict):
     reason:      Optional[str]
     step_passed: bool
     messages:    Annotated[list[BaseMessage], operator.add]
+    approved:    bool
+    file_path:   Optional[str]
+    line_number: Optional[int]
