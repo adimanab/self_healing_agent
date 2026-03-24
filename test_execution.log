@@ -22,3 +22,9 @@
 2026-03-23 23:09:10,597 - INFO - Starting test: test_checkout_price_and_finish
 2026-03-23 23:09:44,875 - INFO - Starting test: test_add_items_under_20
 2026-03-23 23:10:17,106 - INFO - Starting test: test_login
+2026-03-24 11:46:29,442 - INFO - Starting test: test_remove_item_from_cart
+2026-03-24 11:46:42,971 - INFO - Item removed from cart successfully
+2026-03-24 11:46:45,761 - INFO - Starting test: test_checkout_price_and_finish
+2026-03-24 11:46:59,209 - INFO - Clicked checkout button
+2026-03-24 11:47:00,355 - INFO - User information submitted
+2026-03-24 11:47:51,390 - INFO - Starting test: test_add_items_under_20
