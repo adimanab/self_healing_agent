@@ -1,0 +1,41 @@
+<!-- tests/fixtures/dynamic_page.html -->
+<!DOCTYPE html>
+<html>
+<head><title>Mock Dynamic App</title></head>
+<body data-reactroot>                          <!-- triggers _detect_dynamic -->
+
+  <div class="sc-xAbcDef1 hKqRsT">            <!-- hashed classes -->
+    <form class="sc-login-xYz9 kLmNpQ">
+
+      <label for="email-input">Email</label>
+      <input
+        id="email-input"
+        data-testid="login-email"
+        type="email"
+        placeholder="Enter your email"
+        class="sc-input-hAsH1 xYz123"
+      />
+
+      <label for="pass-input">Password</label>
+      <input
+        id="pass-input"
+        data-testid="login-password"
+        type="password"
+        placeholder="Enter your password"
+        class="sc-input-hAsH2 aBc456"
+      />
+
+      <button
+        data-testid="login-submit"
+        aria-label="Sign in"
+        class="sc-btn-hAsH3 dEf789"
+        type="submit"
+      >
+        Sign In
+      </button>
+
+    </form>
+  </div>
+
+</body>
+</html>
