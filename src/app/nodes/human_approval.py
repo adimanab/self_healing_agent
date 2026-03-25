@@ -74,8 +74,10 @@ def human_approval(state: AgentState) -> dict:
         (f"{confidence:.1f}%", "bold green"), " ", 
         (conf_label, "bold white on blue")
     ))
-    right_table.add_row("REASON", Text(reason, style="white"))
-    
+    # line 77 — wrap every field that could be None
+    right_table.add_row("REASON",     Text(reason     or "N/A", style="white"))
+    right_table.add_row("SUGGESTION", Text(suggestion or "N/A", style="white"))
+    right_table.add_row("CONFIDENCE", Text(str(confidence) if confidence is not None else "0.0", style="white"))
     right_panel = Panel(right_table, title="[dim]llm suggestion[/dim]", title_align="left", expand=True, border_style="dim")
 
     layout_table.add_row(left_panel, right_panel)

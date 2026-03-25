@@ -85,3 +85,12 @@
 2026-03-24 15:04:43,023 - INFO - Starting test: test_login
 2026-03-24 15:08:05,791 - INFO - Starting test: test_login
 2026-03-24 15:14:45,349 - INFO - Starting test: test_login
+2026-03-24 15:37:32,920 - INFO - Starting test: test_login
+2026-03-24 15:43:03,109 - INFO - Starting test: test_remove_item_from_cart
+2026-03-24 15:47:43,454 - INFO - Starting test: test_remove_item_from_cart
+2026-03-24 18:14:35,612 - INFO - Starting test: test_remove_item_from_cart
+2026-03-24 18:22:58,847 - INFO - Starting test: test_remove_item_from_cart
+2026-03-24 18:28:27,403 - INFO - Starting test: test_remove_item_from_cart
+2026-03-24 18:32:22,521 - INFO - Starting test: test_remove_item_from_cart
+2026-03-24 18:33:48,162 - INFO - Starting test: test_remove_item_from_cart
+2026-03-25 11:18:02,112 - INFO - Starting test: test_remove_item_from_cart

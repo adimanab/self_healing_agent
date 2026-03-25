@@ -23,42 +23,33 @@ def reason_and_suggest(state: AgentState) -> dict:
         is_dynamic = state.get("is_dynamic", False)
         xpath_candidates = state.get("xpath_candidates") or []
 
-        # ── 1. SYSTEM PROMPT ─────────────────────────────────────────────────
+        # Inside reason_and_suggest(state: AgentState) in llm_reason.py
+
         if is_dynamic:
             sys_prompt = SystemMessage(content="""
 You are an expert Test Automation AI specialized in healing broken Playwright selectors
-on DYNAMIC websites (React, Vue, Angular, Next.js).
+on DYNAMIC websites.
 
-These sites auto-generate class names and IDs that change on every deploy.
-CSS selectors based on those will keep breaking. Your job is to suggest STABLE alternatives.
+CRITICAL STRATEGY: RELATIONAL ANCHORING
+If the element being sought is a dynamic value (like a price, status, or date), 
+DO NOT suggest a selector based on that value's text. Instead:
+1. Identify a STABLE ANCHOR nearby (e.g., a Product Name or Label text).
+2. Use XPath axes (ancestor, following-sibling, parent) to bridge from the 
+Stable Anchor to the Dynamic Target.
 
-Selector stability ranking (prefer top):
-  1. data-testid / data-cy / data-test-id  →  set by devs, never auto-generated
-  2. aria-label                             →  accessibility attr, very stable
-  3. visible text content                   →  //button[text()='Submit']
-  4. placeholder                            →  //input[@placeholder='Email']
-  5. label relationship                     →  //label[text()='Email']/following-sibling::input
-  6. type attribute                         →  //input[@type='email']
-  7. CSS with semantic class (not hashed)   →  .login-form button
+Updated Stability Ranking:
+1. data-testid / data-cy         →  Primary Choice
+2. Relational Anchor             →  (e.g., //div[text()='Name']/ancestor::div//div[@class='price'])
+3. aria-label                    →  Accessibility-based
+4. placeholder                   →  For inputs
+5. Label Relationship            →  //label[text()='Email']/following-sibling::input
 
 Your task:
-  1. Analyze why the selector failed (auto-generated ID/class, element not yet rendered, etc.)
-  2. Review the pre-computed XPath candidates provided — evaluate each for stability
-  3. Also look at the DOM directly for any stable attributes you can use
-  4. Return the best 2-3 selectors ranked by stability, mixing XPath and CSS as appropriate
+- Analyze the 'test_name' and 'selector' to understand the INTENT (e.g., if it's 'item_price', look for a price).
+- If the original selector used 'ancestor' or 'sibling', preserve that relational logic in your fix.
+- Return the best 2-3 selectors. Favor XPaths that use stable text anchors to find dynamic siblings.
 
-Respond with ONLY a JSON object with these exact keys:
-  - "suggestion": single best selector (string) — for backward compatibility
-  - "reason": why the original failed and how you chose the fix
-  - "confidence": float 0.0-1.0
-  - "step_passed": false
-  - "ranked_selectors": list of objects, each with:
-      - "selector": the selector string
-      - "type": "xpath" or "css"
-      - "confidence": float 0.0-1.0
-      - "reason": one-line explanation of why this selector is stable
-
-No extra text. No markdown fences.
+Respond with ONLY a JSON object... (keep same keys)
 """)
         else:
             # ── original static site prompt — completely unchanged ────────────
@@ -116,10 +107,9 @@ DOM       : {state['dom_context']}
 
 def _parse_llm_output(content: str) -> dict:
     try:
-        clean = content.strip().removeprefix("```json").removesuffix("```").strip()
+        clean  = content.strip().removeprefix("```json").removesuffix("```").strip()
         parsed = json.loads(clean)
 
-        # ── 3. PARSE ranked_selectors if present ─────────────────────────────
         raw_ranked = parsed.get("ranked_selectors")
         ranked_selectors = None
         if isinstance(raw_ranked, list):
@@ -135,17 +125,17 @@ def _parse_llm_output(content: str) -> dict:
             ]
 
         return {
-            "suggestion":       parsed.get("suggestion"),
-            "reason":           parsed.get("reason"),
+            "suggestion":       parsed.get("suggestion") or "No suggestion available",
+            "reason":           parsed.get("reason")     or "No reason provided",   # ← never None
             "confidence":       float(100 * float(parsed.get("confidence", 0.0))),
             "step_passed":      bool(parsed.get("step_passed", False)),
-            "ranked_selectors": ranked_selectors,   # None for static sites
+            "ranked_selectors": ranked_selectors,
         }
 
     except (json.JSONDecodeError, ValueError):
         return {
-            "suggestion":       content,
-            "reason":           "Failed to parse structured output from LLM",
+            "suggestion":       "Failed to parse LLM output",
+            "reason":           "Failed to parse structured output from LLM",  # ← never None
             "confidence":       0.0,
             "step_passed":      False,
             "ranked_selectors": None,
