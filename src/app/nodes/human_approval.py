@@ -13,12 +13,12 @@ from src.app.state import AgentState
 def human_approval(state: AgentState) -> dict:
     console = Console()
     
-    suggestion  = state.get("suggestion", "—")
-    selector    = state.get("selector",   "—")
-    confidence  = float(state.get("confidence", 0.0))
-    reason      = state.get("reason", "—")
+    suggestion  = state["suggestion"]
+    selector    = state["selector"]
+    confidence  = float(state["confidence"])
+    reason      = state["reason"]
     timestamp   = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    test_short  = state.get("test_name", "—").split("::")[-1]
+    test_short  = state["test_name"].split("::")[-1]
 
     error_lines = state.get("error", "—").splitlines() if state.get("error") else ["—"]
     error_short = next(

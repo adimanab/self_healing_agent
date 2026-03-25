@@ -7,7 +7,7 @@ class InventoryItemPage:
 
         self.img_link = "//img[@data-test='{!s}']"
         self.item_description = "//div[text()='{!s}']/parent::a/following-sibling::div"
-        self.item_price = "//div[text()='{!s}']/ancestor::div[@class='inventory_item_cost']/following-sibling::div/div"
+        self.item_price = "//div[text()='{!s}']/ancestor::div[@class='inventory_item_label']/following-sibling::div/div"
         self.add_to_cart_btn = "//button[@data-test='add-to-cart-{!s}']"
         self.remove_from_cart_btn = "#remove-{!s}"
         self.get_all_items_name = "//div[@data-test='inventory-item-name']"

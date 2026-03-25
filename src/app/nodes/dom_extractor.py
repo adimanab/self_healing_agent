@@ -25,8 +25,9 @@ def dom_extractor(state: AgentState) -> dict:
         focused_dom = safe_serialize(soup.body, char_limit=3000)
 
     hints = build_selector_hints(soup, selector)
-    is_dynamic = _detect_dynamic(soup)
-    return {
-        "dom_context": focused_dom + hints,
-        "is_dynamic": is_dynamic
-        }
+
+    state["dom_context"] = focused_dom + hints
+    return  state
+      
+    
+   

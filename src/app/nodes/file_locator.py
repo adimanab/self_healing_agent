@@ -3,14 +3,9 @@ from src.app.tools.open_file_at_position import file_locator_tool
 
 def file_locator(state: AgentState) -> dict:
 
-    # print(state["test_name"])
-    test_name = state.get("test_name", "")
-    selector = state.get("selector", "")
 
-    print(
-        "state: ", state,
-        "selector: ", selector
-    )
+    test_name = state["test_name"]
+    selector = state["selector"]
     
     if not selector:
         return state
