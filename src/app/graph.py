@@ -1,3 +1,4 @@
+from bs4 import BeautifulSoup
 from langgraph.graph import StateGraph, START, END
 from src.app.nodes.dom_extractor import dom_extractor
 from src.app.nodes.llm_reason import reason_and_suggest
@@ -9,7 +10,7 @@ from src.app.state import AgentState
 
 def route_after_dom(state: AgentState):
     """Conditional routing: dynamic sites get xpath building, static go direct"""
-    return "xpath" if state.get("is_dynamic") else "Reasoning_agent" 
+    return "xpath" if state.get("is_dynamic") else "Dom_Extractor" 
 
 builder = StateGraph(AgentState)
 
@@ -27,15 +28,16 @@ def check_approval(state: AgentState):
     return END
 
 # Set flow
-builder.add_edge(START, "Dom_Extractor")
-builder.add_conditional_edges("Dom_Extractor", 
-    route_after_dom,
+
+builder.add_conditional_edges(START,
+                              route_after_dom, 
     {
+        "Dom_Extractor": "Dom_Extractor",
         "xpath": "xpath",
-        "Reasoning_agent": "Reasoning_agent",   
-    }
-)
+    })
+
 builder.add_edge("xpath", "Reasoning_agent")
+builder.add_edge("Dom_Extractor", "Reasoning_agent")
 builder.add_edge("Reasoning_agent", "File_Locator")
 builder.add_edge("File_Locator", "Human_Approval")
 
