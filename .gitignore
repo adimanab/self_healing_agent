@@ -9,3 +9,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Test execution logs
+test_execution.log
