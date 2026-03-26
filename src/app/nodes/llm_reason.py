@@ -83,7 +83,28 @@ XPath Candidates (pre-computed, ranked by stability — evaluate each):
 {ranked}
 """
 
-        task_prompt = HumanMessage(content=f"""
+#         task_prompt = HumanMessage(content=f"""
+# Test Name : {state['test_name']}
+# Selector  : {state['selector']}
+# Error     : {state['error']}
+# DOM       : {state['dom_context']}
+# {xpath_section}
+# """)
+
+        if is_dynamic:
+            task_prompt = HumanMessage(content=f"""
+Test Name : {state['test_name']}
+Selector  : {state['selector']}
+Error     : {state['error']}
+DOM       : {state['dom_context']}
+xpath      : {state['suggestion']}
+confidence : {state['confidence']}
+reason     : {state['reason']}
+intent     : {state['intent']}
+{xpath_section}
+""")
+        else:
+            task_prompt = HumanMessage(content=f"""
 Test Name : {state['test_name']}
 Selector  : {state['selector']}
 Error     : {state['error']}
@@ -99,11 +120,26 @@ DOM       : {state['dom_context']}
     response = llm.invoke(messages)
     new_messages.append(response)
 
-    return {
-        "messages": new_messages,
-        **_parse_llm_output(response.content),
-    }
+    # return {
+    #     "messages": new_messages,
+    #     **_parse_llm_output(response.content),
+    # }
 
+    print("RESPONSE CONTENT: ", response.content)
+    
+    parsed = _parse_llm_output(response.content)
+
+    print("What is going: ", parsed)
+
+    # parsed.get("suggestion") = state["suggestion"]
+    # parsed.get("confidence") = state["confidence"]
+    # parsed.get("reason") = state["reason"]
+
+    print("=== what is going ===")
+    print(f"xpath      : {state['suggestion']}")
+    print(f"confidence : {state['confidence']}")
+    print(f"reason     : {state['reason']}")
+    return state
 
 def _parse_llm_output(content: str) -> dict:
     try:
