@@ -13,21 +13,21 @@ from src.app.state import AgentState
 def human_approval(state: AgentState) -> dict:
     console = Console()
     
-    suggestion  = state.get("suggestion", "—")
-    selector    = state.get("selector",   "—")
-    confidence  = float(state.get("confidence", 0.0))
-    reason      = state.get("reason", "—")
+    suggestion  = state["suggestion"]
+    selector    = state["selector"]
+    confidence  = float(state["confidence"])
+    reason      = state["reason"]
     timestamp   = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    test_short  = state.get("test_name", "—").split("::")[-1]
+    test_short  = state["test_name"].split("::")[-1]
 
-    error_lines = state.get("error", "—").splitlines() if state.get("error") else ["—"]
+    error_lines = state["error"].splitlines() if state["error"] else ["—"]
     error_short = next(
         (l.strip() for l in error_lines if "TimeoutError" in l or "Error:" in l),
         error_lines[0]
     )
 
-    file_path = state.get("file_path")
-    line_number = state.get("line_number")
+    file_path = state["file_path"]
+    line_number = state["line_number"]
     base_dir = Path(__file__).parent.parent.parent.parent
 
     # Header
@@ -64,7 +64,7 @@ def human_approval(state: AgentState) -> dict:
     right_table = Table.grid(padding=(0, 2))
     right_table.add_column(style="dim")
     right_table.add_column()
-    right_table.add_row("FIX WITH", Text(f" {suggestion} ", style="bold white on green"))
+    right_table.add_row("FIX WITH", Text(f"{suggestion}", style="bold white on green"))
     
     bar_width = int((confidence / 100) * 20)
     conf_bar = "█" * bar_width + "░" * (20 - bar_width)

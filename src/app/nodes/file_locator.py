@@ -6,11 +6,6 @@ def file_locator(state: AgentState) -> dict:
     # print(state["test_name"])
     test_name = state.get("test_name", "")
     selector = state.get("selector", "")
-
-    print(
-        "state: ", state,
-        "selector: ", selector
-    )
     
     if not selector:
         return state

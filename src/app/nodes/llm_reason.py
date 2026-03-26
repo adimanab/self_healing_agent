@@ -8,7 +8,7 @@ from langchain_openai import ChatOpenAI
 
 
 llm = ChatOpenAI(
-    model="llama-3.3-70b-versatile",
+    model="llama-3.3-70b-versatile", 
     base_url=os.getenv("GROQ_BASE_URL"),
     api_key=os.getenv("GROQ_API_KEY"),
     temperature=0.4

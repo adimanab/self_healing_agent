@@ -20,7 +20,7 @@ builder.add_node("Reasoning_agent", reason_and_suggest)
 builder.add_node("File_Locator", file_locator)
 builder.add_node("Human_Approval", human_approval)
 builder.add_node("Apply_Fix", apply_fix)
-builder.add_node("xpath", xpath_builder)    # building XPath candidates
+builder.add_node("xpath", xpath_builder)
 
 def check_approval(state: AgentState):
     if state.get("approved"):
