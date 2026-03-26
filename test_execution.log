@@ -152,3 +152,36 @@
 2026-03-26 14:35:26,818 - INFO - Starting test: test_add_items_under_20
 2026-03-26 14:39:09,083 - INFO - Starting test: test_add_items_under_20
 2026-03-26 14:41:07,219 - INFO - Starting test: test_add_items_under_20
+2026-03-26 14:45:51,356 - INFO - Starting test: test_remove_item_from_cart
+2026-03-26 14:46:05,021 - INFO - Item removed from cart successfully
+2026-03-26 14:46:06,903 - INFO - Starting test: test_checkout_price_and_finish
+2026-03-26 14:46:24,611 - INFO - Clicked checkout button
+2026-03-26 14:46:27,662 - INFO - User information submitted
+2026-03-26 14:46:27,734 - INFO - Checkout overview items validated
+2026-03-26 14:46:27,744 - INFO - Subtotal and tax matched
+2026-03-26 14:46:27,744 - INFO - Total price matched
+2026-03-26 14:46:29,676 - INFO - Order finished successfully
+2026-03-26 14:46:31,502 - INFO - Starting test: test_add_items_under_20
+2026-03-26 14:46:44,960 - INFO - Added items: ['Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt', 'Sauce Labs Onesie', 'Test.allTheThings() T-Shirt (Red)']
+2026-03-26 14:46:45,030 - INFO - Inventory items under $20 validated in cart
+2026-03-26 14:46:46,093 - INFO - Starting test: test_login
+2026-03-26 14:46:51,272 - INFO - Login successful
+2026-03-26 14:47:36,214 - INFO - Starting test: test_add_items_under_20
+2026-03-26 14:52:01,513 - INFO - Starting test: test_add_items_under_20
+2026-03-26 14:55:29,012 - INFO - Starting test: test_add_items_under_20
+2026-03-26 15:03:10,918 - INFO - Starting test: test_add_items_under_20
+2026-03-26 15:07:19,507 - INFO - Starting test: test_add_items_under_20
+2026-03-26 15:09:16,169 - INFO - Starting test: test_add_items_under_20
+2026-03-26 15:11:55,147 - INFO - Starting test: test_add_items_under_20
+2026-03-26 15:13:46,938 - INFO - Starting test: test_add_items_under_20
+2026-03-26 15:16:04,587 - INFO - Starting test: test_add_items_under_20
+2026-03-26 15:19:31,126 - INFO - Starting test: test_add_items_under_20
+2026-03-26 15:24:47,415 - INFO - Starting test: test_add_items_under_20
+2026-03-26 15:31:33,190 - INFO - Starting test: test_login
+2026-03-26 15:43:33,268 - INFO - Starting test: test_login
+2026-03-26 15:44:45,328 - INFO - Starting test: test_login
+2026-03-26 15:44:50,586 - INFO - Login successful
+2026-03-26 16:26:03,245 - INFO - Starting test: test_remove_item_from_cart
+2026-03-26 16:26:54,859 - INFO - Starting test: test_checkout_price_and_finish
+2026-03-26 16:28:26,675 - INFO - Starting test: test_login
+2026-03-26 16:30:02,833 - INFO - Starting test: test_login

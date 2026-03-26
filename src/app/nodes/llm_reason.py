@@ -47,7 +47,7 @@ Updated Stability Ranking:
 Your task:
 - Analyze the 'test_name' and 'selector' to understand the INTENT (e.g., if it's 'item_price', look for a price).
 - If the original selector used 'ancestor' or 'sibling', preserve that relational logic in your fix.
-- Return the best 2-3 selectors. Favor XPaths that use stable text anchors to find dynamic siblings.
+- Return the best selectors. Favor XPaths that use stable text anchors to find dynamic siblings.
 
 REPLY ONLY WITH JSON:
 {
@@ -133,7 +133,7 @@ DOM       : {state['dom_context']}
     #     **_parse_llm_output(response.content),
     # }
 
-    print("RESPONSE CONTENT: ", response.content)
+    # print("RESPONSE CONTENT: ", response.content)
     
     parsed = _parse_llm_output(response.content)
 
@@ -154,9 +154,20 @@ DOM       : {state['dom_context']}
 
 def _parse_llm_output(content: str) -> dict:
     try:
+        print("==================================================================================================")
+        print("CONTENT:")
+        print(content)
+        print("==================================================================================================")
+
+
         # Remove markdown fences if present
         clean = content.strip().replace("```json", "").replace("```", "").strip()
         parsed = json.loads(clean)
+        print("==================================================================================================")
+        print("PARSED:")
+        print(parsed)
+        print("==================================================================================================")
+
 
         # Handle the LLM returning a list for "suggestion" or "selector"
         suggestion = parsed.get("suggestion") or parsed.get("selector")
