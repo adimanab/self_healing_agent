@@ -62,8 +62,8 @@ def human_approval(state: AgentState) -> dict:
 
     # Right Panel
     right_table = Table.grid(padding=(0, 2))
-    right_table.add_column(style="dim")
-    right_table.add_column()
+    right_table.add_column(style="dim", no_wrap=True) 
+    right_table.add_column(overflow="fold")
     right_table.add_row("FIX WITH", Text(f"{suggestion}", style="bold white on green"))
     
     bar_width = int((confidence / 100) * 20)

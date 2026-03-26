@@ -49,7 +49,14 @@ Your task:
 - If the original selector used 'ancestor' or 'sibling', preserve that relational logic in your fix.
 - Return the best 2-3 selectors. Favor XPaths that use stable text anchors to find dynamic siblings.
 
-Respond with ONLY a JSON object... (keep same keys)
+REPLY ONLY WITH JSON:
+{
+  "suggestion": "the corrected xpath",
+  "reason": "explanation of the relational bridge used",
+  "confidence": "how much it is in 0-100 range",
+  "intent": "brief description of action"
+}
+No extra text. No markdown fences. Be precise with the names and xpath.
 """)
         else:
             # ── original static site prompt — completely unchanged ────────────
@@ -63,12 +70,13 @@ Your task:
 3. Suggest the CORRECT selector that exists in the actual DOM
 4. Explain the issue and your reasoning
 
-Respond with ONLY a JSON object with these exact keys:
-  - "suggestion": corrected Playwright selector (must exist in the provided DOM)
-  - "reason":     detailed explanation of why the original failed and how you found the correction
-  - "confidence": float 0.0-1.0 (high if you found exact match in DOM, lower if guessing)
-  - "step_passed": false
-
+REPLY ONLY WITH JSON:
+{
+  "suggestion": "the corrected xpath",
+  "reason": "explanation of the relational bridge used",
+  "confidence": "how much it is in 0-100 range",
+  "intent": "brief description of action"
+}
 No extra text. No markdown fences. Be precise with the class names and selectors.
 """)
 
@@ -130,49 +138,49 @@ DOM       : {state['dom_context']}
     parsed = _parse_llm_output(response.content)
 
     print("What is going: ", parsed)
+    suggestion = parsed.get("suggestion")
+    reason = parsed.get("reason")
+    confidence = parsed.get("confidence")
 
-    # parsed.get("suggestion") = state["suggestion"]
-    # parsed.get("confidence") = state["confidence"]
-    # parsed.get("reason") = state["reason"]
+    state["suggestion"] = suggestion
+    state["confidence"] = confidence
+    state["reason"] = reason
 
     print("=== what is going ===")
-    print(f"xpath      : {state['suggestion']}")
-    print(f"confidence : {state['confidence']}")
-    print(f"reason     : {state['reason']}")
+    print(f"xpath      : {state['suggestion']} : {suggestion}")
+    print(f"confidence : {state['confidence']} : {confidence}")
+    print(f"reason     : {state['reason']}: {reason}")
     return state
 
 def _parse_llm_output(content: str) -> dict:
     try:
-        clean  = content.strip().removeprefix("```json").removesuffix("```").strip()
+        # Remove markdown fences if present
+        clean = content.strip().replace("```json", "").replace("```", "").strip()
         parsed = json.loads(clean)
 
-        raw_ranked = parsed.get("ranked_selectors")
-        ranked_selectors = None
-        if isinstance(raw_ranked, list):
-            ranked_selectors = [
-                {
-                    "selector":   str(item.get("selector", "")),
-                    "type":       str(item.get("type", "css")),
-                    "confidence": float(item.get("confidence", 0.0)),
-                    "reason":     str(item.get("reason", "")),
-                }
-                for item in raw_ranked
-                if isinstance(item, dict) and item.get("selector")
-            ]
+        # Handle the LLM returning a list for "suggestion" or "selector"
+        suggestion = parsed.get("suggestion") or parsed.get("selector")
+        if isinstance(suggestion, list) and len(suggestion) > 0:
+            suggestion = suggestion[0]
+        elif not suggestion:
+            suggestion = "No suggestion available"
+
+        # Normalize confidence to 0.0 - 1.0 range
+        conf = parsed.get("confidence", 0.0)
+        # if conf > 1.0:
+        #     conf = conf / 100.0
 
         return {
-            "suggestion":       parsed.get("suggestion") or "No suggestion available",
-            "reason":           parsed.get("reason")     or "No reason provided",   # ← never None
-            "confidence":       float(100 * float(parsed.get("confidence", 0.0))),
-            "step_passed":      bool(parsed.get("step_passed", False)),
-            "ranked_selectors": ranked_selectors,
+            "suggestion": suggestion,
+            "reason":     parsed.get("reason") or "No reason provided",
+            "confidence": float(conf),
+            "intent":     parsed.get("intent", "Unknown")
         }
 
     except (json.JSONDecodeError, ValueError):
         return {
-            "suggestion":       "Failed to parse LLM output",
-            "reason":           "Failed to parse structured output from LLM",  # ← never None
-            "confidence":       0.0,
-            "step_passed":      False,
-            "ranked_selectors": None,
+            "suggestion": "Failed to parse LLM output",
+            "reason":     "The LLM response was not valid JSON",
+            "confidence": 0.0,
+            "intent":     "Unknown"
         }
