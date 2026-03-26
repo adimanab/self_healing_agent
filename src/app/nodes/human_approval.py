@@ -7,12 +7,13 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
+from rich.rule import Rule
 from rich import box
 from src.app.state import AgentState
 
 def human_approval(state: AgentState) -> dict:
     console = Console()
-    
+
     suggestion  = state["suggestion"]
     selector    = state["selector"]
     confidence  = float(state["confidence"])
@@ -26,77 +27,101 @@ def human_approval(state: AgentState) -> dict:
         error_lines[0]
     )
 
-    file_path = state["file_path"]
+    file_path   = state["file_path"]
     line_number = state["line_number"]
-    base_dir = Path(__file__).parent.parent.parent.parent
+    base_dir    = Path(__file__).parent.parent.parent.parent
 
-    # Header
+    # ── Header ────────────────────────────────────────────────────────────────
     header = Table.grid(expand=True)
     header.add_column()
     header.add_column(justify="right")
     header.add_row(
-        Text("SELF-HEALING AGENT  —  HUMAN APPROVAL", style="bold blue"),
-        Text(f"  {timestamp}", style="dim")
+        Text("SELF-HEALING AGENT  —  HUMAN APPROVAL", style="bold bright_blue"),
+        Text(timestamp, style="dim cyan"),
     )
-    console.print(Panel(header, style="blue", box=box.SQUARE))
+    console.print(Panel(header, style="bright_blue", box=box.SQUARE, padding=(0, 1)))
 
-    layout_table = Table.grid(expand=True)
-    layout_table.add_column(ratio=1)
-    layout_table.add_column(ratio=1)
+    # ── TOP: Broken selector block ────────────────────────────────────────────
+    broken = Table.grid(padding=(0, 2))
+    broken.add_column(style="dim", no_wrap=True, min_width=12)
+    broken.add_column(overflow="fold")
 
-    # Left Panel
-    left_table = Table.grid(padding=(0, 2))
-    left_table.add_column(style="dim")
-    left_table.add_column()
-    left_table.add_row("SELECTOR", Text(f" {selector} ", style="bold white on red"))
-    left_table.add_row("ERROR", Text(error_short, style="yellow"))
-    left_table.add_row("TEST", Text(test_short, style="dim"))
+    broken.add_row(
+        "SELECTOR",
+        Text(f" {selector} ", style="bold white on red"),
+    )
+    broken.add_row(
+        "ERROR",
+        Text(error_short or "—", style="yellow"),
+    )
+    broken.add_row(
+        "TEST",
+        Text(test_short, style="dim"),
+    )
     if file_path:
         try:
-            rel_path = os.path.relpath(file_path, base_dir)
-            left_table.add_row("FILE", Text(f"{rel_path}:{line_number}", style="dim"))
+            rel = os.path.relpath(file_path, base_dir)
+            broken.add_row("FILE", Text(f"{rel}:{line_number}", style="dim"))
         except ValueError:
-            left_table.add_row("FILE", Text(f"{file_path}:{line_number}", style="dim"))
-    
-    left_panel = Panel(left_table, title="[dim]broken selector[/dim]", title_align="left", expand=True, border_style="dim")
+            broken.add_row("FILE", Text(f"{file_path}:{line_number}", style="dim"))
 
-    # Right Panel
-    right_table = Table.grid(padding=(0, 2))
-    right_table.add_column(style="dim", no_wrap=True) 
-    right_table.add_column(overflow="fold")
-    right_table.add_row("FIX WITH", Text(f"{suggestion}", style="bold white on green"))
-    
-    bar_width = int((confidence / 100) * 20)
-    conf_bar = "█" * bar_width + "░" * (20 - bar_width)
-    conf_label = "HIGH" if confidence >= 70 else "MED"
-    right_table.add_row("CONFIDENCE", Text.assemble(
-        (conf_bar, "green"), " ", 
-        (f"{confidence:.1f}%", "bold green"), " ", 
-        (conf_label, "bold white on blue")
-    ))
-    # line 77 — wrap every field that could be None
-    right_table.add_row("REASON",     Text(reason     or "N/A", style="white"))
-    right_table.add_row("SUGGESTION", Text(suggestion or "N/A", style="white"))
-    right_table.add_row("CONFIDENCE", Text(str(confidence) if confidence is not None else "0.0", style="white"))
-    right_panel = Panel(right_table, title="[dim]llm suggestion[/dim]", title_align="left", expand=True, border_style="dim")
+    console.print(
+        Panel(broken, title="[dim]broken selector[/dim]", title_align="left",
+              border_style="red", box=box.SQUARE)
+    )
 
-    layout_table.add_row(left_panel, right_panel)
-    console.print(layout_table)
-    
-    # footer interaction
+    # ── MIDDLE: Arrow separator ───────────────────────────────────────────────
+    console.print(Text("          ▼  llm suggestion", style="dim"))
+
+    # ── BOTTOM: LLM suggestion block ─────────────────────────────────────────
+    bar_width  = int((confidence / 100) * 24)
+    conf_bar   = "█" * bar_width + "░" * (24 - bar_width)
+    conf_label = "HIGH" if confidence >= 70 else "MED "
+
+    fix = Table.grid(padding=(0, 2))
+    fix.add_column(style="dim", no_wrap=True, min_width=12)
+    fix.add_column(overflow="fold")
+
+    fix.add_row(
+        "FIX WITH",
+        Text(f" {suggestion} ", style="bold white on green"),
+    )
+    fix.add_row(
+        "CONFIDENCE",
+        Text.assemble(
+            (conf_bar, "green"), "  ",
+            (f"{confidence:.1f}%", "bold green"), "  ",
+            (f"[{conf_label}]", "bold white on blue"),
+        ),
+    )
+    fix.add_row(
+        "REASON",
+        Text(reason or "N/A", style="white"),
+    )
+
+    console.print(
+        Panel(fix, title="[dim]fix[/dim]", title_align="left",
+              border_style="green", box=box.SQUARE)
+    )
+
+    # ── Footer ────────────────────────────────────────────────────────────────
     footer = Table.grid(expand=True)
     footer.add_column()
     footer.add_column(justify="right")
     footer.add_row(
         Text("self-healing-agent  ·  langgraph + groq", style="dim"),
-        Text("[A]ccept Fix   [R]eject Fix   [C]opy Fix", style="bold")
+        Text.assemble(
+            ("[A]", "bold green"),  ("ccept   ", "default"),
+            ("[R]", "bold red"),    ("eject   ", "default"),
+            ("[C]", "bold cyan"),   ("opy",      "default"),
+        ),
     )
-    console.print(Panel(footer, border_style="dim", box=box.SQUARE))
+    console.print(Panel(footer, border_style="dim", box=box.SQUARE, padding=(0, 1)))
 
+    # ── Input ─────────────────────────────────────────────────────────────────
     approved = False
-
-    # Read input
     console.print("[dim]Action [(A)ccept / (R)eject / (C)opy]: [/dim]", end="")
+
     try:
         if sys.platform == "win32":
             import msvcrt
@@ -110,7 +135,7 @@ def human_approval(state: AgentState) -> dict:
         else:
             try:
                 import tty, termios
-                fd = sys.stdin.fileno()
+                fd           = sys.stdin.fileno()
                 old_settings = termios.tcgetattr(fd)
                 try:
                     tty.setraw(fd)
@@ -119,28 +144,29 @@ def human_approval(state: AgentState) -> dict:
                     termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
             except Exception:
                 char = input("").strip().lower()
-                
+
         console.print(char.upper())
 
-        if char == 'a':
+        if char == "a":
             approved = True
             console.print("[bold green]✓ Fix accepted. Applying...[/bold green]")
-        elif char == 'r':
+        elif char == "r":
             console.print("[bold red]✗ Fix rejected.[/bold red]")
-        elif char == 'c':
+        elif char == "c":
             _copy_to_clip(suggestion, console)
             console.print("[dim]Continuing without applying fix (copied to clipboard)[/dim]")
-    except Exception as e:
-        console.print(f"\n[dim]Continuing...[/dim]")
+
+    except Exception:
+        console.print("\n[dim]Continuing...[/dim]")
 
     return {
-        "approved": approved,
-        "file_path": file_path,
-        "line_number": line_number
+        "approved":    approved,
+        "file_path":   file_path,
+        "line_number": line_number,
     }
 
+
 def _copy_to_clip(text: str, console: Console):
-    import subprocess, sys
     try:
         if sys.platform == "win32":
             subprocess.run("clip", input=text.encode(), check=True)
