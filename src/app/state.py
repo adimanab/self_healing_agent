@@ -20,5 +20,4 @@ class AgentState(TypedDict):
 
     #xpath 
     is_dynamic:       bool                 # detected by dom_extractor
-    xpath_candidates: Optional[List[str]]  # built by xpath_builder node
-    ranked_selectors: Optional[List[dict]] # final output: [{selector, type, confidence, reason}]
+    intent: str

@@ -10,27 +10,31 @@ from src.app.graph import graph_init
 def run_healing_agent(test_name: str, selector: str, error: str, page) -> None:
     dom_context = page.content()
     
-    """
-    Heuristic: is this DOM from a React/Vue/Angular app?
-    Checks for framework fingerprints in the parsed HTML.
-    """
-    soup = BeautifulSoup(dom_context, 'html.parser')
-    html_str = str(soup)
-    signals = [
-        'data-reactroot',
-        'data-react-',
-        '__vue__',
-        'ng-version',
-        '_nuxt',
-        'data-v-',             # Vue scoped styles
-        '__NEXT_DATA__',       # Next.js
-        'gatsby-',
-    ]
-    # Also flag if >30% of IDs look auto-generated (hash-like)
-    all_ids = [tag.get('id', '') for tag in soup.find_all(id=True)]
-    hash_like = [i for i in all_ids if len(i) > 6 and not i.replace('-','').replace('_','').isalpha()]
-    hash_ratio = len(hash_like) / max(len(all_ids), 1)
-    is_dynamic = any(s in html_str for s in signals) or hash_ratio > 0.3
+    def determine_if_dynamic(sel: str, err: str) -> bool:
+        sel_lower = sel.lower().strip()
+        err_lower = err.lower()
+        #xpath checking - pattern finding like '/' or '//'
+        is_xpath_format = (
+            sel_lower.startswith('/') or 
+            sel_lower.startswith('//') or 
+            sel_lower.startswith('xpath=') or
+            '[' in sel_lower and ('@' in sel_lower or 'text()' in sel_lower)
+        )
+        
+        # 2. Error Message Keywords
+        # Check if the error explicitly mentions XPath issues (like 'unable to locate xpath')
+        # vs CSS/Selector issues.
+        mentions_xpath = 'xpath' in err_lower
+        mentions_css = 'selector' in err_lower or 'css' in err_lower
+
+        # Logic: If it's an XPath or the error specifically flags XPath, treat as Dynamic
+        if is_xpath_format or (mentions_xpath and not mentions_css):
+            return True
+        
+        # Default to False in case of Static
+        return False
+
+    is_dynamic = determine_if_dynamic(selector, error)
 
     state = {
         "test_name":   test_name,

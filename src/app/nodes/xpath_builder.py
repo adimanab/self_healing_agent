@@ -1,91 +1,110 @@
-import re
-from bs4 import BeautifulSoup, Tag
+"""
+xpath_builder.py — Self-Healing Agent Node
+==========================================
+Invoked when an XPath selector fails to resolve an element in the live DOM.
+
+Responsibilities:
+  1. Understand the *semantic intent* of the failed XPath (what action was it
+     meant to perform, e.g. "click the login button").
+  2. Search the current DOM for the element now fulfilling that intent, even
+     if its tag, text, or attributes have changed.
+  3. Produce a single best XPath suggestion and a plain-English reason, then
+     update state["xpath_suggestion"].
+
+State keys consumed:
+  - state["selector"]     : the original XPath / CSS selector that failed
+  - state["dom_context"]  : raw HTML of the current page / component
+  - state["error"]        : (optional) error message from the previous attempt
+  - state["is_dynamic"]   : bool — skip healing on static pages
+
+State keys produced:
+  - state["suggestion"]: "xpath"  : str  — the suggested replacement XPath
+  - state["reason]: "reason" : str  — plain-English explanation of the reasoning
+  - state["confident"]: "confidence": "high" | "medium" | "low"
+  - state["intent"]: intent: what is suppose to do
+    On failure / skip: {"xpath": None, "reason": "<why>", "confidence": "low"}
+"""
+
+from bs4 import BeautifulSoup
 from src.app.state import AgentState
-from typing import List, Optional, Tuple
+from src.app.utils.xpath.dom_summarisation import _summarise_dom
+from src.app.utils.xpath.llm_wrapper import _invoke_llm
+from src.app.utils.xpath.post_validation import _resolve_placeholders, _validate_xpath_in_dom
+
+# ---------------------------------------------------------------------------
+# Public agent-node entry point
+# ---------------------------------------------------------------------------
 
 def xpath_builder(state: AgentState) -> dict:
-    if not state.get("is_dynamic"):
-        return {"xpath_candidates": []}
+    """LangGraph / custom-graph node.  Returns a partial state patch."""
 
-    soup = BeautifulSoup(state["dom_context"], "html.parser")
-    error_msg = state.get("error", "").lower()
-    
-    # 1. Enhanced Intent Extraction (Splits camelCase/snake_case)
-    intent_keywords = _extract_intent_keywords(state["selector"])
-    
-    # 2. Semantic + Proximity Search
-    semantic_targets = _find_semantic_targets(soup, intent_keywords, error_msg)
-    
-    all_candidates = []
-    for target in semantic_targets:
-        all_candidates.extend(_build_candidates(target))
+    selector: str = state.get("selector", "")
 
-    seen = set()
-    return {"xpath_candidates": [c for c in all_candidates if not (c in seen or seen.add(c))]}
+    # --- DEBUG: Detect unresolved template placeholders ---
+    # unresolved = re.findall(r"\{[^}]+\}", selector)
+    # if unresolved:
+    #     return {
+    #         "xpath_suggestion": {
+    #             "intent":     "Selector contains unresolved placeholders",
+    #             "xpath":      None,
+    #             "reason":     (
+    #                 f"The selector contains unfilled template variables: {unresolved}. "
+    #                 f"The placeholder was never substituted before the XPath was used. "
+    #                 f"Call .format() or use an f-string before passing to the agent."
+    #             ),
+    #             "confidence": "low",
+    #         }
+    #     }
 
-def _extract_intent_keywords(selector: str) -> List[str]:
-    """Extracts clues from the broken selector to define the 'intent'."""
-    # Split by symbols, camelCase, and snake_case
-    words = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\b)|[0-9]+', selector)
-    ignore = {'xpath', 'button', 'input', 'div', 'span', 'true', 'false', 'id', 'data', 'test', 'selector'}
-    return [w.lower() for w in words if w.lower() not in ignore and len(w) > 2]
+    dom_context: str = state.get("dom_context", "")
+    error_msg: str = state.get("error", "")
 
-def _find_semantic_targets(soup: BeautifulSoup, keywords: List[str], error: str) -> List[Tag]:
-    """Scores elements based on internal content AND surrounding context (Proximity)."""
-    candidates = []
-    target_tags = ['button', 'a', 'input', 'select', 'textarea']
-    elements = soup.find_all(target_tags)
+    if not selector or not dom_context:    
+        state["suggestion"]=None
+        state["resone"]="Missing selector or DOM context; cannot attempt healing."
+        state["intent"]=None
+        state["confidence"]="low"
 
-    for element in elements:
-        score = 0
-        
-        # --- A. Internal Scoring (What the element is) ---
-        element_str = str(element).lower()
-        text_content = element.get_text().lower()
-        
-        for word in keywords:
-            if word in element_str: score += 1  # Keyword in attributes/HTML
-            if word in text_content: score += 3 # Keyword in visible text (Strong Intent)
+    # --- Resolve unresolved template placeholders before anything else ---
+    selector, placeholder_note = _resolve_placeholders(selector, dom_context)
 
-        # --- B. Proximity Scoring (Where the element is) ---
-        # Look at parents/ancestors up to 3 levels up
-        parent = element.parent
-        depth = 0
-        while parent and depth < 3:
-            parent_str = str(parent.attrs).lower()
-            parent_text = "".join(parent.find_all(string=True, recursive=False)).lower()
-            
-            for word in keywords:
-                if word in parent_str: score += 1 # Parent attribute match
-                if word in parent_text: score += 2 # Parent heading/text match
-            
-            parent = parent.parent
-            depth += 1
+    # --- Step 1: distil the DOM to a lean, LLM-friendly summary -------------
+    dom_summary = _summarise_dom(dom_context)
 
-        if score > 0:
-            candidates.append((score, element))
+    # --- Step 2: call the LLM to reason about intent + suggest XPath --------
+    suggestions = _invoke_llm(
+        failed_selector=selector,
+        dom_summary=dom_summary,
+        error_msg=error_msg,
+        extra_context=placeholder_note
+    )
 
-    # Sort by highest score; return top 3 most likely "intent" matches
-    candidates.sort(key=lambda x: x[0], reverse=True)
-    return [c[1] for c in candidates[:3]]
+    print("=== XPATH_BUILDER OUTPUT ===")
+    print(f"xpath      : {suggestions.get('xpath')}")
+    print(f"confidence : {suggestions.get('confidence')}")
+    print(f"reason     : {suggestions.get('reason')}")
+    print(f"intent     : {suggestions.get('intent')}")
+    print("============================")
 
-def _build_candidates(node: Tag) -> List[str]:
-    """Generates stable XPaths based on the Stability Tier ranking."""
-    candidates = []
-    # Tier 1: Test IDs (highest stability)
-    testid = node.get('data-testid') or node.get('data-test-id') or node.get('data-cy')
-    if testid: candidates.append(f"//{node.name}[@data-testid='{testid}']")
+    # --- Step 3: validate the suggested XPath against the live DOM ----------
+    if suggestions["xpath"]:
+        valid = _validate_xpath_in_dom(suggestions["xpath"], dom_context)
+        if not valid:
+            suggestions["reason"] += (
+                " (Note: the suggested XPath could not be verified against the "
+                "current DOM snapshot — please double-check before use.)"
+            )
+            suggestions["confidence"] = "low"
 
-    # Tier 2: ARIA Labels (accessibility)
-    aria = node.get('aria-label')
-    if aria: candidates.append(f"//{node.name}[@aria-label='{aria}']")
+    # confidence string → float conversion for AgentState compatibility
+    confidence_map = {"high": 90.0, "medium": 60.0, "low": 20.0}
+    raw_conf = suggestions.get("confidence", "low")
+    confidence_float = confidence_map.get(raw_conf.lower(), 0.0) if isinstance(raw_conf, str) else float(raw_conf)
 
-    # Tier 3: Text Content (normalize-space for dynamic whitespace)
-    text = node.get_text(strip=True)
-    if text and len(text) < 50:
-        candidates.append(f"//{node.name}[normalize-space()='{text}']")
+    return {                                      # ✅ clean patch dict
+        "suggestion":  suggestions.get("xpath"),
+        "confidence":  confidence_float,          # ✅ float not string
+        "reason":      suggestions.get("reason"),
+        "intent":      suggestions.get("intent"),
+    }
 
-    # Tier 4: Functional Attributes (type/name)
-    if node.get('name'): candidates.append(f"//{node.name}[@name='{node.get('name')}']")
-    
-    return candidates
