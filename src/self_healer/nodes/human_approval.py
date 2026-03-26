@@ -7,9 +7,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
-from rich.rule import Rule
 from rich import box
-from src.app.state import AgentState
+from ..state import AgentState
 
 def human_approval(state: AgentState) -> dict:
     console = Console()

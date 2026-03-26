@@ -1,12 +1,12 @@
 from bs4 import BeautifulSoup
 from langgraph.graph import StateGraph, START, END
-from src.app.nodes.dom_extractor import dom_extractor
-from src.app.nodes.llm_reason import reason_and_suggest
-from src.app.nodes.file_locator import file_locator
-from src.app.nodes.human_approval import human_approval
-from src.app.nodes.apply_fix import apply_fix
-from src.app.nodes.xpath_builder import xpath_builder
-from src.app.state import AgentState
+from .nodes.dom_extractor import dom_extractor
+from .nodes.llm_reason import reason_and_suggest
+from .nodes.file_locator import file_locator
+from .nodes.human_approval import human_approval
+from .nodes.apply_fix import apply_fix
+from .nodes.xpath_builder import xpath_builder
+from .state import AgentState
 
 def route_after_dom(state: AgentState):
     """Conditional routing: dynamic sites get xpath building, static go direct"""

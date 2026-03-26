@@ -5,10 +5,29 @@ build/
 dist/
 wheels/
 *.egg-info
-.env
+*.egg
 
 # Virtual environments
 .venv
+venv/
+env/
+
+# Environment files
+.env
 
 # Test execution logs
 test_execution.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Distribution
+*.tar.gz
+*.whl

@@ -1,11 +1,7 @@
-import os
-import sys
-
 from bs4 import BeautifulSoup
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from .graph import graph_init
 
-from src.app.graph import graph_init
 
 def run_healing_agent(test_name: str, selector: str, error: str, page) -> None:
     dom_context = page.content()

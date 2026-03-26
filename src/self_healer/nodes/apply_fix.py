@@ -1,6 +1,6 @@
 import os
-from src.app.state import AgentState
-from src.app.tools.file_editor_tool import file_editor_tool
+from ..state import AgentState
+from ..tools.file_editor_tool import file_editor_tool
 
 def apply_fix(state: AgentState) -> dict:
     approved = state.get("approved", False)

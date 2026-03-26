@@ -1,5 +1,5 @@
-from src.app.state import AgentState
-from src.app.tools.open_file_at_position import file_locator_tool
+from ..state import AgentState
+from ..tools.open_file_at_position import file_locator_tool
 
 def file_locator(state: AgentState) -> dict:
 
