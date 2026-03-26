@@ -1,17 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
-name = "self-healing-automation-agent"
+name = "self-healer"
 version = "0.1.0"
-description = "Add your description here"
+description = "AI-powered self-healing pytest plugin for Playwright — automatically fixes broken selectors using LLM reasoning"
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "bs4==0.0.2",
-    "langchain==1.2.12",
-    "langchain-openai==1.1.11",
-    "langgraph==1.1.2",
-    "langsmith==0.7.20",
-    "playwright==1.58.0",
-    "pytest==9.0.2",
-    "python-dotenv==1.2.2",
-    "textual==8.1.1",
+license = {text = "MIT"}
+requires-python = ">=3.10"
+keywords = ["pytest", "playwright", "self-healing", "ai", "automation", "testing", "langgraph"]
+classifiers = [
+    "Framework :: Pytest",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Quality Assurance",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
 ]
+dependencies = [
+    "beautifulsoup4>=4.12",
+    "build>=1.4.2",
+    "langchain>=1.0",
+    "langchain-openai>=1.0",
+    "langgraph>=1.0",
+    "langsmith>=0.7",
+    "playwright>=1.40",
+    "pytest>=7.0",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+xpath-validation = ["lxml>=4.9"]
+
+[project.urls]
+Homepage = "https://github.com/your-username/self-healer"
+Issues = "https://github.com/your-username/self-healer/issues"
+
+# This is the magic — pytest auto-discovers this as a plugin
+[project.entry-points.pytest11]
+self_healer = "self_healer.plugin"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/self_healer"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/self_healer"]
+
+[tool.pytest.ini_options]
+testpaths = ["examples/saucedemo/tests"]

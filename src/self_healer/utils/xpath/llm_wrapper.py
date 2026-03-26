@@ -1,9 +1,9 @@
 import json
 import re
 import textwrap
-import os
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
+from ...config import get_api_key, get_base_url, get_model_name, get_temperature
 
 _SYSTEM_PROMPT = textwrap.dedent("""
     You are an expert in web automation and XPath.
@@ -51,7 +51,7 @@ def _invoke_llm(
     error_msg: str,
     extra_context: str = "",    
 ) -> dict:
-    """Calls Claude to reason about intent and generate a healed XPath."""
+    """Calls the LLM to reason about intent and generate a healed XPath."""
 
     user_message = textwrap.dedent(f"""
         FAILED SELECTOR: {failed_selector}
@@ -65,17 +65,15 @@ def _invoke_llm(
         {dom_summary}
     """).strip()
 
-    # client = anthropic.Anthropic()
-
     try:
         llm = ChatOpenAI(
-        model="llama-3.3-70b-versatile",
-        base_url=os.getenv("GROQ_BASE_URL"),
-        api_key=os.getenv("GROQ_API_KEY"),
-        temperature=0.4,
-        max_tokens=1024,        # output token limit
-        timeout=30,             # seconds
-        max_retries=2,
+            model=get_model_name(),
+            base_url=get_base_url(),
+            api_key=get_api_key(),
+            temperature=get_temperature(),
+            max_tokens=1024,
+            timeout=30,
+            max_retries=2,
         )
 
         response = llm.invoke([

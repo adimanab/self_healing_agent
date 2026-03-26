@@ -1,18 +1,18 @@
-import os
 import json
 from langchain_core.messages import HumanMessage, SystemMessage
-from dotenv import load_dotenv
-load_dotenv(override=True)
-from src.app.state import AgentState
+from ..state import AgentState
+from ..config import get_api_key, get_base_url, get_model_name, get_temperature
 from langchain_openai import ChatOpenAI
 
 
-llm = ChatOpenAI(
-    model="llama-3.3-70b-versatile", 
-    base_url=os.getenv("GROQ_BASE_URL"),
-    api_key=os.getenv("GROQ_API_KEY"),
-    temperature=0.4
-)
+def _get_llm():
+    """Lazy-initialise the LLM so env vars are read at call time, not import time."""
+    return ChatOpenAI(
+        model=get_model_name(),
+        base_url=get_base_url(),
+        api_key=get_api_key(),
+        temperature=get_temperature(),
+    )
 
 
 def reason_and_suggest(state: AgentState) -> dict:
@@ -22,8 +22,6 @@ def reason_and_suggest(state: AgentState) -> dict:
     if not messages:
         is_dynamic = state.get("is_dynamic", False)
         xpath_candidates = state.get("xpath_candidates") or []
-
-        # Inside reason_and_suggest(state: AgentState) in llm_reason.py
 
         if is_dynamic:
             sys_prompt = SystemMessage(content="""
@@ -91,14 +89,6 @@ XPath Candidates (pre-computed, ranked by stability — evaluate each):
 {ranked}
 """
 
-#         task_prompt = HumanMessage(content=f"""
-# Test Name : {state['test_name']}
-# Selector  : {state['selector']}
-# Error     : {state['error']}
-# DOM       : {state['dom_context']}
-# {xpath_section}
-# """)
-
         if is_dynamic:
             task_prompt = HumanMessage(content=f"""
 Test Name : {state['test_name']}
@@ -120,24 +110,18 @@ DOM       : {state['dom_context']}
 {xpath_section}
 """)
 
-        # print("yeh gaaya llm main: ", state["dom_context"])
-
         messages = [sys_prompt, task_prompt]
         new_messages.extend(messages)
 
+    llm = _get_llm()
     response = llm.invoke(messages)
     new_messages.append(response)
-
-    # return {
-    #     "messages": new_messages,
-    #     **_parse_llm_output(response.content),
-    # }
 
     # print("RESPONSE CONTENT: ", response.content)
     
     parsed = _parse_llm_output(response.content)
 
-    print("What is going: ", parsed)
+    # print("What is going: ", parsed)
     suggestion = parsed.get("suggestion")
     reason = parsed.get("reason")
     confidence = parsed.get("confidence")
@@ -146,28 +130,17 @@ DOM       : {state['dom_context']}
     state["confidence"] = confidence
     state["reason"] = reason
 
-    print("=== what is going ===")
-    print(f"xpath      : {state['suggestion']} : {suggestion}")
-    print(f"confidence : {state['confidence']} : {confidence}")
-    print(f"reason     : {state['reason']}: {reason}")
+    # print("=== what is going ===")
+    # print(f"xpath      : {state['suggestion']} : {suggestion}")
+    # print(f"confidence : {state['confidence']} : {confidence}")
+    # print(f"reason     : {state['reason']}: {reason}")
     return state
 
 def _parse_llm_output(content: str) -> dict:
     try:
-        print("==================================================================================================")
-        print("CONTENT:")
-        print(content)
-        print("==================================================================================================")
-
-
         # Remove markdown fences if present
         clean = content.strip().replace("```json", "").replace("```", "").strip()
         parsed = json.loads(clean)
-        print("==================================================================================================")
-        print("PARSED:")
-        print(parsed)
-        print("==================================================================================================")
-
 
         # Handle the LLM returning a list for "suggestion" or "selector"
         suggestion = parsed.get("suggestion") or parsed.get("selector")
@@ -178,8 +151,6 @@ def _parse_llm_output(content: str) -> dict:
 
         # Normalize confidence to 0.0 - 1.0 range
         conf = parsed.get("confidence", 0.0)
-        # if conf > 1.0:
-        #     conf = conf / 100.0
 
         return {
             "suggestion": suggestion,

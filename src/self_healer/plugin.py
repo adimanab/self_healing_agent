@@ -1,18 +1,30 @@
-# ── [1] IMPORTS ───────────────────────────────────────────────────────────────
+"""
+self_healer.plugin
+==================
+Pytest plugin that automatically activates the self-healing agent when a
+Playwright test fails due to a broken selector.
+
+Registration:
+    This module is registered as a pytest plugin via the ``pytest11`` entry
+    point in ``pyproject.toml``.  When a user installs ``self-healer`` and
+    runs ``pytest``, these hooks and fixtures are auto-discovered — zero
+    configuration required.
+
+What it provides:
+    1. ``enable_healing(page)`` — call this in your own ``page`` fixture to
+       enable locator tracking on the page.
+    2. ``pytest_runtest_makereport`` hook — intercepts test failures and
+       triggers the healing agent when a selector-related error is detected.
+"""
+
 import re
-import sys
-import os
+from dataclasses import dataclass
 import pytest
-from dataclasses import dataclass, field
-from playwright.sync_api import sync_playwright
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-
-from src.app.main import run_healing_agent  # ← swap this import when packaged
+from .main import run_healing_agent
 
 
-# ── [2] DATA MODEL ────────────────────────────────────────────────────────────
-# future: reporter.py → ErrorReport, store(), get_all()
+# ── Data Model ────────────────────────────────────────────────────────────────
 
 @dataclass
 class ErrorReport:
@@ -20,54 +32,60 @@ class ErrorReport:
     selector:  str
     error:     str
 
+
 _error_reports: list[ErrorReport] = []
 
 
-# ── [3] STATE ─────────────────────────────────────────────────────────────────
-# future: tracker.py → record_empty(), get_last_empty(), clear()
+# ── Plugin State ──────────────────────────────────────────────────────────────
 
 _current_page     = None
 _selector_tracker = {}
+
 
 def _tracker_record_empty(selector: str):
     _selector_tracker['last_empty_selector'] = selector
     _selector_tracker['last_empty_error']    = f"Selector '{selector}' returned no elements"
 
+
 def _tracker_get_last_empty() -> str | None:
     return _selector_tracker.get('last_empty_selector')
+
 
 def _tracker_clear():
     _selector_tracker.clear()
 
 
-# ── [4] BROWSER FIXTURE ───────────────────────────────────────────────────────
-# future: page_fixture.py → session-scoped browser factory
-# Session-scoped so the browser stays alive when the pytest hook fires after tests
+# ── Public API: enable_healing() ──────────────────────────────────────────────
 
-@pytest.fixture(scope="session")
-def browser_instance():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        yield browser
-        browser.close()
+def enable_healing(page):
+    """
+    Patch a Playwright page so that locator calls are tracked for empty results.
 
+    Call this inside your own ``page`` fixture::
 
-# ── [5] PAGE FIXTURE ──────────────────────────────────────────────────────────
-# future: page_fixture.py → patch_page(), page fixture factory
-# Patches the page's locator so empty results are tracked automatically
+        import pytest
+        from playwright.sync_api import sync_playwright
+        from self_healer import enable_healing
 
-@pytest.fixture(scope="function")
-def page(browser_instance):
+        @pytest.fixture(scope="session")
+        def browser_instance():
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=False)
+                yield browser
+                browser.close()
+
+        @pytest.fixture(scope="function")
+        def page(browser_instance):
+            pg = browser_instance.new_page()
+            enable_healing(pg)          # ← this line
+            pg.goto("https://your-app.com")
+            yield pg
+            pg.close()
+    """
     global _current_page
+    _current_page = page
 
-    pg = browser_instance.new_page()
-    pg.goto("https://www.saucedemo.com/")
-    _current_page = pg
-
-    # ── locator patch ─────────────────────────────────────────────────────────
-    # Intercepts locator calls to detect selectors that return empty results.
-    # Add more method patches below if your page objects use other locator methods.
-    original_locator = pg.locator
+    original_locator = page.locator
 
     def tracked_locator(selector, **kwargs):
         loc = original_locator(selector, **kwargs)
@@ -90,7 +108,7 @@ def page(browser_instance):
             return result
         loc.all = tracked_all
 
-        # Patch: all_inner_texts() ← used by get_cart_prices(), get_cart_names(), get_cart_desc()
+        # Patch: all_inner_texts()
         _orig_all_inner = loc.all_inner_texts
         def tracked_all_inner_texts():
             result = _orig_all_inner()
@@ -101,14 +119,11 @@ def page(browser_instance):
 
         return loc
 
-    pg.locator = tracked_locator
-
-    yield pg
-    pg.close()  # only closes the page, NOT the browser
+    page.locator = tracked_locator
+    return page
 
 
-# ── [6] SELECTOR UTILS ────────────────────────────────────────────────────────
-# future: agent.py → extract_selector()
+# ── Selector Extraction ──────────────────────────────────────────────────────
 
 def _extract_selector(exc_value: BaseException, item) -> str:
     # Priority 1: manually set on the test item
@@ -131,8 +146,7 @@ def _extract_selector(exc_value: BaseException, item) -> str:
     return "unknown"
 
 
-# ── [7] TRIGGER LOGIC ─────────────────────────────────────────────────────────
-# future: agent.py → should_trigger(), trigger()
+# ── Trigger Logic ─────────────────────────────────────────────────────────────
 
 def _should_trigger_agent(error_msg: str) -> bool:
     # Strip ANSI color codes before matching
@@ -162,13 +176,12 @@ def _should_trigger_agent(error_msg: str) -> bool:
 def _trigger_agent(report_obj: ErrorReport):
     """
     Single place that calls run_healing_agent.
-    When packaged: replace run_healing_agent with the user-supplied callable.
     """
-    print(f"\n[self-healing] Triggering for : {report_obj.test_name}")
-    print(f"[self-healing] Selector       : {report_obj.selector}")
-    print(f"[self-healing] Error snippet  : {report_obj.error[:120]}")
+    print(f"\n[self-healer] Triggering for : {report_obj.test_name}")
+    print(f"[self-healer] Selector       : {report_obj.selector}")
+    print(f"[self-healer] Error snippet  : {report_obj.error[:120]}")
 
-    run_healing_agent(           # ← single line to swap when packaged
+    run_healing_agent(
         test_name = report_obj.test_name,
         selector  = report_obj.selector,
         error     = report_obj.error,
@@ -176,8 +189,7 @@ def _trigger_agent(report_obj: ErrorReport):
     )
 
 
-# ── [8] PYTEST HOOK ───────────────────────────────────────────────────────────
-# future: hooks.py → pytest_runtest_makereport()
+# ── Pytest Hook ───────────────────────────────────────────────────────────────
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -212,12 +224,11 @@ def pytest_runtest_makereport(item, call):
         try:
             _trigger_agent(report_obj)
         except Exception as e:
-            print(f"\n[self-healing] Agent error: {e}")
+            print(f"\n[self-healer] Agent error: {e}")
         finally:
             _tracker_clear()
     else:
-        # Debug output — remove when stable
-        print(f"\n[self-healing] Agent NOT triggered.")
+        print(f"\n[self-healer] Agent NOT triggered.")
         print(f"  _current_page is None : {_current_page is None}")
         print(f"  should_trigger        : {_should_trigger_agent(error_msg)}")
         print(f"  error_msg snippet     : {repr(error_msg[:120])}")

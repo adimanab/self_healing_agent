@@ -1,7 +1,7 @@
 import os
 from langchain_core.tools import tool
 
-from src.app.lib.open_file_position import open_in_editor
+from ..lib.open_file_position import open_in_editor
 
 @tool
 def file_locator_tool(test_name: str, failing_selector: str) -> dict:

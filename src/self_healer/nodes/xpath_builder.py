@@ -26,10 +26,10 @@ State keys produced:
 """
 
 from bs4 import BeautifulSoup
-from src.app.state import AgentState
-from src.app.utils.xpath.dom_summarisation import _summarise_dom
-from src.app.utils.xpath.llm_wrapper import _invoke_llm
-from src.app.utils.xpath.post_validation import _resolve_placeholders, _validate_xpath_in_dom
+from ..state import AgentState
+from ..utils.xpath.dom_summarisation import _summarise_dom
+from ..utils.xpath.llm_wrapper import _invoke_llm
+from ..utils.xpath.post_validation import _resolve_placeholders, _validate_xpath_in_dom
 
 # ---------------------------------------------------------------------------
 # Public agent-node entry point
@@ -40,22 +40,6 @@ def xpath_builder(state: AgentState) -> dict:
 
     selector: str = state.get("selector", "")
 
-    # --- DEBUG: Detect unresolved template placeholders ---
-    # unresolved = re.findall(r"\{[^}]+\}", selector)
-    # if unresolved:
-    #     return {
-    #         "xpath_suggestion": {
-    #             "intent":     "Selector contains unresolved placeholders",
-    #             "xpath":      None,
-    #             "reason":     (
-    #                 f"The selector contains unfilled template variables: {unresolved}. "
-    #                 f"The placeholder was never substituted before the XPath was used. "
-    #                 f"Call .format() or use an f-string before passing to the agent."
-    #             ),
-    #             "confidence": "low",
-    #         }
-    #     }
-
     dom_context: str = state.get("dom_context", "")
     error_msg: str = state.get("error", "")
 
@@ -65,28 +49,26 @@ def xpath_builder(state: AgentState) -> dict:
         state["intent"]=None
         state["confidence"]="low"
 
-        # return state
-
     # --- Resolve unresolved template placeholders before anything else ---
     selector, placeholder_note = _resolve_placeholders(selector, dom_context)
 
     # --- Step 1: distil the DOM to a lean, LLM-friendly summary -------------
-    # dom_summary = _summarise_dom(dom_context)
+    dom_summary = _summarise_dom(dom_context)
 
     # --- Step 2: call the LLM to reason about intent + suggest XPath --------
     suggestions = _invoke_llm(
         failed_selector=selector,
-        dom_summary=dom_context,
+        dom_summary=dom_summary,
         error_msg=error_msg,
         extra_context=placeholder_note
     )
 
-    print("=== XPATH_BUILDER OUTPUT ===")
-    print(f"xpath      : {suggestions.get('xpath')}")
-    print(f"confidence : {suggestions.get('confidence')}")
-    print(f"reason     : {suggestions.get('reason')}")
-    print(f"intent     : {suggestions.get('intent')}")
-    print("============================")
+    # print("=== XPATH_BUILDER OUTPUT ===")
+    # print(f"xpath      : {suggestions.get('xpath')}")
+    # print(f"confidence : {suggestions.get('confidence')}")
+    # print(f"reason     : {suggestions.get('reason')}")
+    # print(f"intent     : {suggestions.get('intent')}")
+    # print("============================")
 
     # --- Step 3: validate the suggested XPath against the live DOM ----------
     if suggestions["xpath"]:
@@ -108,12 +90,11 @@ def xpath_builder(state: AgentState) -> dict:
     state['reason']=suggestions.get("reason")
     state['intent']=suggestions.get("intent")
 
-    print("=== XPATH_BUILDER OUTPUT ===")
-    print(f"xpath      : {state['suggestion']}")
-    print(f"confidence : {state['confidence']}")
-    print(f"reason     : {state['reason']}")
-    print(f"intent     : {state['intent']}")
-    print("============================")
+    # print("=== XPATH_BUILDER OUTPUT ===")
+    # print(f"xpath      : {state['suggestion']}")
+    # print(f"confidence : {state['confidence']}")
+    # print(f"reason     : {state['reason']}")
+    # print(f"intent     : {state['intent']}")
+    # print("============================")
 
     return state
-
