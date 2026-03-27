@@ -28,24 +28,18 @@ All of this happens **automatically** — just install and run your tests.
 
 ```bash
 pip install self-healer
-playwright install chromium
 ```
 
 ### Step 2: Set Environment Variables
 
-```bash
+```python
 # Required
-export GROQ_API_KEY="gsk_your_api_key_here"
+API_KEY="sk_..."
+LLM_MODEL="openai/gpt-4.1-mini"
 
 # Optional (these have defaults)
-export GROQ_BASE_URL="https://api.groq.com/openai/v1"
-export SELF_HEAL_MODEL="llama-3.3-70b-versatile"
-export SELF_HEAL_TEMPERATURE="0.4"
-```
-
-On Windows (PowerShell):
-```powershell
-$env:GROQ_API_KEY = "gsk_your_api_key_here"
+BASE_URL="https://api.openai.com"
+TEMPERATURE="0.4"
 ```
 
 ### Step 3: Add to your conftest.py
@@ -88,7 +82,7 @@ def test_login(page: Page):
 ### Step 5: Run
 
 ```bash
-pytest -v -s
+pytest -v
 ```
 
 If `#login-button` changes to `#btn-login`, the agent will:
@@ -105,45 +99,52 @@ All configuration is via environment variables — no config files needed.
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `GROQ_API_KEY` | ✅ | — | Your Groq API key |
-| `GROQ_BASE_URL` | ❌ | `https://api.groq.com/openai/v1` | API endpoint URL |
-| `SELF_HEAL_MODEL` | ❌ | `llama-3.3-70b-versatile` | LLM model name |
-| `SELF_HEAL_TEMPERATURE` | ❌ | `0.4` | LLM temperature (0.0–1.0) |
+| `API_KEY` | ✅ | — | Your API key |
+| `LLM_MODEL` | ✅ | — | LLM model name |
+| `BASE_URL` | ❌ | `https://api.openai.com` | API endpoint URL |
+| `TEMPERATURE` | ❌ | `0.4` | LLM temperature (0.0–1.0) |
 
 ---
 
 ## 🏗️ How It Works
 
 ```
-Test Fails (broken selector)
-        │
-        ▼
-┌─────────────────┐
-│  Detect Failure  │  pytest hook intercepts the error
-└────────┬────────┘
-         │
-         ▼
+                Test Fails (broken selector)
+                    │
+                    ▼
+            ┌─────────────────┐
+            │  Detect Failure │  pytest hook intercepts the error
+            └────────┬────────┘
+            ┌────────┴─────────┐
+            ▼                  ▼
 ┌─────────────────┐     ┌──────────────────┐
-│  DOM Extractor   │────▶│  XPath Builder    │  (for dynamic sites)
+│  DOM Extractor  │     │   XPath Builder  │  (for dynamic sites)
 └────────┬────────┘     └────────┬─────────┘
-         │                       │
          └───────────┬───────────┘
                      ▼
-         ┌──────────────────┐
-         │  LLM Reasoning   │  Groq / LLaMA analyzes intent + DOM
-         └────────┬─────────┘
-                  ▼
-         ┌──────────────────┐
-         │  File Locator    │  Finds the exact file:line of the selector
-         └────────┬─────────┘
-                  ▼
-         ┌──────────────────┐
-         │  Human Approval  │  Rich TUI: Accept / Reject / Copy
-         └────────┬─────────┘
-                  ▼
-         ┌──────────────────┐
-         │  Apply Fix       │  Edits the source file + opens editor
-         └─────────────────┘
+            ┌──────────────────┐
+            │  LLM Reasoning   │  Groq/LLaMA analyzes intent + DOM
+            └────────┬─────────┘
+                     ▼
+            ┌──────────────────┐
+            │  File Locator    │  Finds exact file:line of selector
+            └────────┬─────────┘
+                     ▼
+            ┌──────────────────┐
+            │ Human Approval   │  Rich TUI: Accept / Reject / Copy
+            └────────┬─────────┘
+            ┌────────┴─────────┐
+           Yes                 No
+            │                  │
+            ▼                  ▼
+    ┌────────────────┐ ┌───────────────┐
+    │    Apply Fix   │ │  Reject Fix   │
+    └────┬───────────┘ └───────┬───────┘
+         └──────────┬──────────┘
+                    ▼
+                ┌─────────┐
+                │   END   │
+                └─────────┘
 ```
 
 ---
@@ -153,10 +154,10 @@ Test Fails (broken selector)
 ### Building from source
 
 ```bash
-git clone https://github.com/your-username/self-healer.git
-cd self-healer
-pip install build
-python -m build
+git clone https://github.com/ankan01-cbnits/self_healing_agent.git
+cd self-healing_agent
+uv sync
+uv build
 ```
 
 ### Publishing to PyPI
@@ -169,21 +170,6 @@ twine upload --repository testpypi dist/*
 # Then publish to real PyPI
 twine upload dist/*
 ```
-
-### Running the example project
-
-```bash
-pip install -e .
-playwright install chromium
-export GROQ_API_KEY="gsk_..."
-pytest examples/saucedemo/tests/ -v -s
-```
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please open an issue or pull request.
 
 ---
 
