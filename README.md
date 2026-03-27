@@ -53,20 +53,18 @@ from dotenv import load_dotenv
 load_dotenv()
 from self_healer import enable_healing
 
+
 @pytest.fixture(scope="session")
-def browser_instance():
+def page():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
-        yield browser
-        browser.close()
+        page = browser.new_page()
 
-@pytest.fixture(scope="function")
-def page(browser_instance):
-    pg = browser_instance.new_page()
-    enable_healing(pg)                    # ← Enable self-healing
-    pg.goto("https://your-app.com")
-    yield pg
-    pg.close()
+        enable_healing(page)                    # ← Enable self-healing
+        
+        page.goto("https://www.your-app.com/")
+        yield page
+        browser.close()
 ```
 
 ### Step 4: Write Tests (normal Playwright)
