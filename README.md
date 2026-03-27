@@ -48,6 +48,9 @@ TEMPERATURE="0.4"
 # conftest.py
 import pytest
 from playwright.sync_api import sync_playwright
+
+from dotenv import load_dotenv
+load_dotenv()
 from self_healer import enable_healing
 
 @pytest.fixture(scope="session")
