@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "self-healer"
-version = "0.1.0"
+version = "1.0.0"
 description = "AI-powered self-healing pytest plugin for Playwright — automatically fixes broken selectors using LLM reasoning"
 readme = "README.md"
 license = {text = "MIT"}
@@ -25,6 +25,7 @@ classifiers = [
 dependencies = [
     "beautifulsoup4>=4.12",
     "build>=1.4.2",
+    "dotenv>=0.9.9",
     "langchain>=1.0",
     "langchain-openai>=1.0",
     "langgraph>=1.0",
