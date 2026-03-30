@@ -15,7 +15,7 @@ State keys consumed:
   - state["selector"]     : the original XPath / CSS selector that failed
   - state["dom_context"]  : raw HTML of the current page / component
   - state["error"]        : (optional) error message from the previous attempt
-  - state["is_dynamic"]   : bool — skip healing on static pages
+  - state["is_xpath"]   : bool — skip healing on static pages
 
 State keys produced:
   - state["suggestion"]: "xpath"  : str  — the suggested replacement XPath
@@ -25,9 +25,9 @@ State keys produced:
     On failure / skip: {"xpath": None, "reason": "<why>", "confidence": "low"}
 """
 
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 from ..state import AgentState
-from ..utils.xpath.dom_summarisation import _summarise_dom
+from ..utils.xpath.dom_summarisation import _summarise_dom, _classify_failure
 from ..utils.xpath.llm_wrapper import _invoke_llm
 from ..utils.xpath.post_validation import _resolve_placeholders, _validate_xpath_in_dom
 
@@ -49,17 +49,21 @@ def xpath_builder(state: AgentState) -> dict:
         state["intent"]=None
         state["confidence"]="low"
 
+    # --- Step 1: distil the DOM to a lean, LLM-friendly summary -------------
+    dom_summary = _summarise_dom(dom_context)
+
     # --- Resolve unresolved template placeholders before anything else ---
     selector, placeholder_note = _resolve_placeholders(selector, dom_context)
 
-    # --- Step 1: distil the DOM to a lean, LLM-friendly summary -------------
-    dom_summary = _summarise_dom(dom_context)
+    #classify what is wrong
+    state["failure_mode"]=_classify_failure(error_msg=state["error"])
 
     # --- Step 2: call the LLM to reason about intent + suggest XPath --------
     suggestions = _invoke_llm(
         failed_selector=selector,
         dom_summary=dom_summary,
         error_msg=error_msg,
+        failure_mode = state["failure_mode"],
         extra_context=placeholder_note
     )
 
@@ -89,6 +93,7 @@ def xpath_builder(state: AgentState) -> dict:
     state['confidence']=confidence_float
     state['reason']=suggestions.get("reason")
     state['intent']=suggestions.get("intent")
+    state["retry_count"] = state.get("retry_count", 0) + 1
 
     # print("=== XPATH_BUILDER OUTPUT ===")
     # print(f"xpath      : {state['suggestion']}")

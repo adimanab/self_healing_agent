@@ -19,5 +19,8 @@ class AgentState(TypedDict):
     line_number: Optional[int]
 
     #xpath 
-    is_dynamic:       bool                 # detected by dom_extractor
+    is_xpath:       bool                 # detected by dom_extractor
     intent: str
+    wait_strategy: Optional[str]
+    failure_mode: Optional[str]
+    retry_count: int
