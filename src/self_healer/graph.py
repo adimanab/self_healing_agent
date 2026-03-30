@@ -8,9 +8,12 @@ from .nodes.apply_fix import apply_fix
 from .nodes.xpath_builder import xpath_builder
 from .state import AgentState
 
-def route_after_dom(state: AgentState):
-    """Conditional routing: dynamic sites get xpath building, static go direct"""
-    return "xpath" if state.get("is_dynamic") else "Dom_Extractor" 
+# def route_after_dom(state: AgentState):
+#     """Conditional routing: dynamic sites get xpath building, static go direct"""
+#     return "xpath" if state.get("is_xpath") else "Dom_Extractor" 
+
+def route_by_selector_type(state: AgentState):
+    return "xpath" if state.get("is_xpath") else "Dom_Extractor"
 
 builder = StateGraph(AgentState)
 
@@ -22,15 +25,33 @@ builder.add_node("Human_Approval", human_approval)
 builder.add_node("Apply_Fix", apply_fix)
 builder.add_node("xpath", xpath_builder)
 
+def route_after_reasoning(state: AgentState):
+    """
+    After reason_and_suggest:
+    - If confidence is low AND retries remaining → go back to xpath_builder
+    - If confidence is low AND retries exhausted → go to Human_Approval directly
+    - If confidence is good enough              → proceed to File_Locator
+    """
+    confidence  = state.get("confidence", 0.0)
+    retry_count = state.get("retry_count", 0)
+    is_xpath    = state.get("is_xpath", False)
+
+    if confidence < 50.0:
+        if is_xpath and retry_count < 2:
+            return "xpath"            # retry xpath_builder
+        return "Human_Approval"       # exhausted or CSS — escalate
+
+    return "File_Locator"             # confident enough, proceed
+
+
 def check_approval(state: AgentState):
     if state.get("approved"):
         return "Apply_Fix"
     return END
 
 # Set flow
-
 builder.add_conditional_edges(START,
-                              route_after_dom, 
+                              route_by_selector_type, 
     {
         "Dom_Extractor": "Dom_Extractor",
         "xpath": "xpath",
@@ -38,7 +59,11 @@ builder.add_conditional_edges(START,
 
 builder.add_edge("xpath", "Reasoning_agent")
 builder.add_edge("Dom_Extractor", "Reasoning_agent")
-builder.add_edge("Reasoning_agent", "File_Locator")
+builder.add_conditional_edges("Reasoning_agent", route_after_reasoning, {
+    "xpath":          "xpath",           # low confidence retry
+    "Human_Approval": "Human_Approval",  # low confidence, exhausted
+    "File_Locator":   "File_Locator",    # confident, proceed
+})
 builder.add_edge("File_Locator", "Human_Approval")
 
 builder.add_conditional_edges("Human_Approval", 

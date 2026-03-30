@@ -20,41 +20,32 @@ def reason_and_suggest(state: AgentState) -> dict:
     new_messages = []
 
     if not messages:
-        is_dynamic = state.get("is_dynamic", False)
+        is_xpath = state.get("is_xpath", False)
         xpath_candidates = state.get("xpath_candidates") or []
 
-        if is_dynamic:
+        if is_xpath:
             sys_prompt = SystemMessage(content="""
-You are an expert Test Automation AI specialized in healing broken Playwright selectors
-on DYNAMIC websites.
-
-CRITICAL STRATEGY: RELATIONAL ANCHORING
-If the element being sought is a dynamic value (like a price, status, or date), 
-DO NOT suggest a selector based on that value's text. Instead:
-1. Identify a STABLE ANCHOR nearby (e.g., a Product Name or Label text).
-2. Use XPath axes (ancestor, following-sibling, parent) to bridge from the 
-Stable Anchor to the Dynamic Target.
-
-Updated Stability Ranking:
-1. data-testid / data-cy         →  Primary Choice
-2. Relational Anchor             →  (e.g., //div[text()='Name']/ancestor::div//div[@class='price'])
-3. aria-label                    →  Accessibility-based
-4. placeholder                   →  For inputs
-5. Label Relationship            →  //label[text()='Email']/following-sibling::input
+You are an expert Test Automation AI validating a suggested XPath repair.
+A previous agent has already analyzed the DOM and suggested a fix.
 
 Your task:
-- Analyze the 'test_name' and 'selector' to understand the INTENT (e.g., if it's 'item_price', look for a price).
-- If the original selector used 'ancestor' or 'sibling', preserve that relational logic in your fix.
-- Return the best selectors. Favor XPaths that use stable text anchors to find dynamic siblings.
+1. Review the suggested XPath against the DOM and the original intent.
+2. If the suggestion is correct, confirm it.
+3. If it can be improved, provide a better one.
+4. If it is wrong, provide the correct XPath using relational anchoring:
+   - data-testid / data-cy        → Primary choice
+   - aria-label                   → Accessibility-based  
+   - Stable text anchor + axes    → ancestor, following-sibling
+   - placeholder / label relation → For inputs
 
 REPLY ONLY WITH JSON:
 {
-  "suggestion": "the corrected xpath",
-  "reason": "explanation of the relational bridge used",
-  "confidence": "how much it is in 0-100 range",
+  "suggestion": "confirmed or improved xpath",
+  "reason": "why this xpath is correct or what was wrong with the previous one",
+  "confidence": 0-100,
   "intent": "brief description of action"
 }
-No extra text. No markdown fences. Be precise with the names and xpath.
+No extra text. No markdown fences.
 """)
         else:
             # ── original static site prompt — completely unchanged ────────────
@@ -89,7 +80,7 @@ XPath Candidates (pre-computed, ranked by stability — evaluate each):
 {ranked}
 """
 
-        if is_dynamic:
+        if is_xpath:
             task_prompt = HumanMessage(content=f"""
 Test Name : {state['test_name']}
 Selector  : {state['selector']}
@@ -98,7 +89,7 @@ DOM       : {state['dom_context']}
 xpath      : {state['suggestion']}
 confidence : {state['confidence']}
 reason     : {state['reason']}
-intent     : {state['intent']}
+intent : {state.get('intent', 'Unknown')}
 {xpath_section}
 """)
         else:
@@ -129,7 +120,7 @@ DOM       : {state['dom_context']}
     state["suggestion"] = suggestion
     state["confidence"] = confidence
     state["reason"] = reason
-
+    state["messages"] = new_messages
     # print("=== what is going ===")
     # print(f"xpath      : {state['suggestion']} : {suggestion}")
     # print(f"confidence : {state['confidence']} : {confidence}")

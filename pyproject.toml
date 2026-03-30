@@ -24,15 +24,18 @@ classifiers = [
 ]
 dependencies = [
     "beautifulsoup4>=4.12",
+    "bs4==0.0.2",
     "build>=1.4.2",
     "dotenv>=0.9.9",
-    "langchain>=1.0",
-    "langchain-openai>=1.0",
-    "langgraph>=1.0",
-    "langsmith>=0.7",
-    "playwright>=1.40",
-    "pytest>=7.0",
+    "langchain==1.2.12",
+    "langchain-openai==1.1.11",
+    "langgraph==1.1.2",
+    "langsmith==0.7.20",
+    "playwright==1.58.0",
+    "pytest==9.0.2",
+    "python-dotenv==1.2.2",
     "rich>=13.0",
+    "textual==8.1.1",
 ]
 
 [project.optional-dependencies]

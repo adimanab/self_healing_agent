@@ -27,12 +27,21 @@ _SYSTEM_PROMPT = textwrap.dedent("""
       D. REASON: Explain in 1-3 sentences why you chose this element and XPath.
       E. CONFIDENCE: Rate your confidence as "high", "medium", or "low".
 
+    If failure_mode is "timing":
+    - The XPath may still be correct. Focus on whether wait_strategy should be "explicit_wait".
+    If failure_mode is "unstable_attr":
+    - The element exists but its class/id rotated. Anchor to aria-label, data-testid, or text.
+    If failure_mode is "structure_changed":
+    - The DOM tree restructured. Use ancestor/following-sibling axes relative to stable text.
+                         
     You MUST respond with ONLY valid JSON — no markdown, no extra text:
     {
       "intent":     "<what the original selector was meant to do>",
       "xpath":      "<your suggested XPath>",
       "reason":     "<your explanation>",
-      "confidence": "high" | "medium" | "low"
+      "confidence": "high" | "medium" | "low",
+      "stability":     "stable" | "medium" | "fragile",
+      "wait_strategy": "none" | "explicit_wait" | "poll"
     }
 
     If you genuinely cannot identify a matching element, return:
@@ -41,23 +50,29 @@ _SYSTEM_PROMPT = textwrap.dedent("""
       "xpath":      null,
       "reason":     "<why you could not find a match>",
       "confidence": "low"
+      "stability":     "stable" | "medium" | "fragile",
+      "wait_strategy": "none" | "explicit_wait" | "poll"
     }
+    
 """).strip()
-
 
 def _invoke_llm(
     failed_selector: str,
     dom_summary: str,
     error_msg: str,
+    failure_mode,
     extra_context: str = "",    
 ) -> dict:
-    """Calls the LLM to reason about intent and generate a healed XPath."""
+    """Calls the LLM to reason about intent and generate a healed XPath.""" 
 
     user_message = textwrap.dedent(f"""
         FAILED SELECTOR: {failed_selector}
 
         ERROR (if any):
         {error_msg or "No error message provided."}
+
+        Type of failure:
+        {failure_mode}
 
         {f"ADDITIONAL CONTEXT:{chr(10)}{extra_context}" if extra_context else ""}
 
@@ -94,6 +109,8 @@ def _invoke_llm(
             "xpath":      result.get("xpath"),           # None is valid (no match)
             "reason":     result.get("reason", ""),
             "confidence": result.get("confidence", "low"),
+            "stability": result.get("stability", "unknown"),
+            "wait_strategy": result.get("wait_strategy", "unknown")
         }
 
     except json.JSONDecodeError as exc:

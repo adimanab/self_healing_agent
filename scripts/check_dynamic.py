@@ -1,8 +1,9 @@
 # scripts/check_xpath_builder.py
 import sys, os
+
+from src.self_healer.nodes.xpath_builder import xpath_builder
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from src.app.nodes.xpath_builder import xpath_builder
 
 fixture_path = os.path.join(
     os.path.dirname(__file__), '..',
@@ -18,7 +19,7 @@ state = {
     "selector":    ".sc-btn-hAsH3",        # broken hashed class
     "error":       "Timeout 30000ms exceeded",
     "dom_context": html,
-    "is_dynamic":  True,
+    "is_xpath":  True,
     "xpath_candidates": [],
 }
 result = xpath_builder(state)
@@ -38,7 +39,7 @@ state2 = {
     "selector":    "#submit-btn",
     "error":       "Timeout",
     "dom_context": html,
-    "is_dynamic":  False,
+    "is_xpath":  False,
     "xpath_candidates": [],
 }
 result2 = xpath_builder(state2)
