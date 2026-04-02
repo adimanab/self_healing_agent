@@ -1,4 +1,5 @@
 import os
+import re
 from langchain_core.tools import tool
 
 from ..lib.open_file_position import open_in_editor
@@ -43,7 +44,9 @@ def file_locator_tool(test_name: str, failing_selector: str) -> dict:
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
                         for i, line in enumerate(f):
-                            if failing_selector in line:
+                            exact_pattern = re.compile(rf'(?<![\w-]){re.escape(failing_selector)}(?![\w-])')
+
+                            if exact_pattern.search(line):
                                 column_index = line.find(failing_selector)
 
                                 matches.append({
